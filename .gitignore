@@ -1,0 +1,20 @@
+# --- BACKEND (Node.js) ---
+BE/node_modules/
+BE/.env
+BE/package-lock.json
+
+# --- FRONTEND (Android) ---
+.gradle/
+build/
+local.properties
+.idea/
+*.iml
+captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.bundle
+
+# --- SYSTEM ---
+.DS_Store
+Thumbs.db
