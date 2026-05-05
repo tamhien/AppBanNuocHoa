@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.perfumeshop.R
-import com.example.perfumeshop.ui.viewmodel.LoginViewModel
+import com.example.perfumeshop.viewmodel.LoginViewModel
 
 @Composable
 fun LoginScreen(
