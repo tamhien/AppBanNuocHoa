@@ -2,6 +2,9 @@ package com.example.perfumeshop.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -29,7 +32,7 @@ fun LoginScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Image(
-            painter = painterResource(id = R.drawable.ic_launcher_foreground),
+            painter = painterResource(id = R.drawable.logo),
             contentDescription = "Store Logo",
             modifier = Modifier
                 .size(120.dp)
@@ -40,21 +43,28 @@ fun LoginScreen(
         
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Dữ liệu và sự kiện liên kết trực tiếp với ViewModel
+        // Tên đăng nhập với Icon Person
         OutlinedTextField(
             value = viewModel.username,
             onValueChange = { viewModel.onUsernameChange(it) },
             label = { Text("Tên đăng nhập") },
+            leadingIcon = { 
+                Icon(imageVector = Icons.Default.Person, contentDescription = "User Icon") 
+            },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
+        // Mật khẩu với Icon Lock
         OutlinedTextField(
             value = viewModel.password,
             onValueChange = { viewModel.onPasswordChange(it) },
             label = { Text("Mật khẩu") },
+            leadingIcon = { 
+                Icon(imageVector = Icons.Default.Lock, contentDescription = "Password Icon") 
+            },
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
