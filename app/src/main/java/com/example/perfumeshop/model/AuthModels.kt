@@ -23,3 +23,32 @@ data class AuthResponse(
     @SerializedName("role") val role: String?,
     @SerializedName("full_name") val fullName: String?
 )
+
+// Thêm các models mới để giải quyết lỗi Unresolved reference
+
+data class BaseResponse(
+    @SerializedName("success") val success: Boolean,
+    @SerializedName("message") val message: String
+)
+
+data class UserResponse(
+    @SerializedName("user_id") val userId: Int,
+    @SerializedName("username") val username: String,
+    @SerializedName("full_name") val fullName: String,
+    @SerializedName("email") val email: String,
+    @SerializedName("phone") val phone: String,
+    @SerializedName("address") val address: String,
+    @SerializedName("role") val role: String
+)
+
+data class UpdateProfileRequest(
+    @SerializedName("full_name") val fullName: String,
+    @SerializedName("email") val email: String,
+    @SerializedName("phone") val phone: String,
+    @SerializedName("address") val address: String
+)
+
+data class ChangePasswordRequest(
+    @SerializedName("current_password") val currentPassword: String,
+    @SerializedName("new_password") val newPassword: String
+)

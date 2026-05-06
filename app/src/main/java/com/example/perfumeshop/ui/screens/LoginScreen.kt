@@ -5,25 +5,34 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.perfumeshop.R
+import com.example.perfumeshop.utils.SessionManager
 import com.example.perfumeshop.viewmodel.LoginViewModel
 
 @Composable
 fun LoginScreen(
     onNavigateToRegister: () -> Unit,
     onLoginSuccess: (String) -> Unit,
-    viewModel: LoginViewModel = viewModel() // Kết nối ViewModel ở đây
+    viewModel: LoginViewModel = viewModel()
 ) {
+    var passwordVisible by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val sessionManager = remember { SessionManager(context) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -32,7 +41,7 @@ fun LoginScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Image(
-            painter = painterResource(id = R.drawable.logo),
+            painter = painterResource(id = R.drawable.ic_launcher_foreground),
             contentDescription = "Store Logo",
             modifier = Modifier
                 .size(120.dp)
@@ -43,34 +52,33 @@ fun LoginScreen(
         
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Tên đăng nhập với Icon Person
         OutlinedTextField(
             value = viewModel.username,
             onValueChange = { viewModel.onUsernameChange(it) },
             label = { Text("Tên đăng nhập") },
-            leadingIcon = { 
-                Icon(imageVector = Icons.Default.Person, contentDescription = "User Icon") 
-            },
+            leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Mật khẩu với Icon Lock
         OutlinedTextField(
             value = viewModel.password,
             onValueChange = { viewModel.onPasswordChange(it) },
             label = { Text("Mật khẩu") },
-            leadingIcon = { 
-                Icon(imageVector = Icons.Default.Lock, contentDescription = "Password Icon") 
+            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
+            trailingIcon = {
+                val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    Icon(imageVector = image, contentDescription = null)
+                }
             },
-            visualTransformation = PasswordVisualTransformation(),
+            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
         )
 
-        // Hiển thị thông báo lỗi từ ViewModel
         if (viewModel.errorMessage != null) {
             Text(
                 text = viewModel.errorMessage!!, 
@@ -83,19 +91,12 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(
-            onClick = {
-                // Gọi xử lý login trong ViewModel
-                viewModel.login(onSuccess = onLoginSuccess)
-            },
+            onClick = { viewModel.login(sessionManager, onSuccess = onLoginSuccess) },
             modifier = Modifier.fillMaxWidth().height(50.dp),
-            enabled = !viewModel.isLoading // Vô hiệu hóa nút khi đang loading
+            enabled = !viewModel.isLoading
         ) {
             if (viewModel.isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(24.dp),
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    strokeWidth = 2.dp
-                )
+                CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary)
             } else {
                 Text("Đăng Nhập", fontSize = 16.sp)
             }

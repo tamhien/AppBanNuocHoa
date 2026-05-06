@@ -1,55 +1,81 @@
-# 📋 PROGRESS TODOLIST - PERFUME SHOP API
+# 📋 PROGRESS TODOLIST - PERFUME SHOP PROJECT
 
 ---
 
-## 📦 Module 1: Xác thực & Hồ sơ (Authentication & Profile)
-*Dành cho cả Admin và Khách hàng*
+## 📦 Module 1: Xác thực & Tài khoản (Authentication & Account)
+*Quản lý người dùng, phân quyền và hiển thị theo trạng thái đăng nhập*
 
-- [ ] `POST /api/auth/register` : Đăng ký tài khoản khách hàng mới.
-- [ ] `POST /api/auth/login` : Đăng nhập & Trả về Role (`admin` hoặc `user`).
-- [ ] `GET /api/auth/profile/:id` : Lấy thông tin cá nhân của người dùng.
-- [ ] `PUT /api/auth/profile/:id` : Cập nhật thông tin (Họ tên, SĐT, Địa chỉ).
+### 🔑 Authentication (Tại màn hình Login/Register)
+- [x] `POST /api/register` : Đăng ký tài khoản (Role mặc định là 'user', gửi Password đã Hash).
+- [x] `POST /api/login` : Đăng nhập, trả về Role ('admin'/'user').
+- [ ] `POST /api/forgot-password` : **Quên mật khẩu** (Xử lý tại màn hình Login).
+- [ ] **UI Logic**: Hiển thị nút **Đăng nhập / Đăng ký** khi người dùng chưa đăng nhập.
 
----
-
-## 📦 Module 2: Quản lý Sản phẩm (Perfumes)
-*Admin quản lý kho, User xem và lọc theo nhu cầu*
-
-- [ ] `GET /api/perfumes` : Lấy danh sách toàn bộ nước hoa (Trang chủ).
-- [ ] `GET /api/perfumes/gender/:type` : Lọc nước hoa Nam (`Men`), Nữ (`Women`), hoặc `Unisex`.
-- [ ] `GET /api/perfumes/:id` : Xem chi tiết thông tin 1 chai nước hoa.
-- [ ] `POST /api/perfumes` : **(Admin)** Thêm nước hoa mới (Tên, Ảnh, Giá, Kho...).
-- [ ] `PUT /api/perfumes/:id` : **(Admin)** Cập nhật thông tin hoặc số lượng tồn kho.
-- [ ] `DELETE /api/perfumes/:id` : **(Admin)** Xóa sản phẩm khỏi cửa hàng.
+### 👤 Account (Tại màn hình Trang chủ -> Tab Tài khoản)
+- [ ] `GET /api/profile/:id` : Lấy thông tin cá nhân (Tên, SĐT, Email, Địa chỉ) từ DB.
+- [ ] `PUT /api/profile/:id` : Cập nhật thông tin cá nhân cơ bản.
+- [ ] `PUT /api/change-password/:id` : **Đổi mật khẩu** (Yêu cầu: MK hiện tại, MK mới, Nhập lại MK mới).
+- [ ] `POST /api/logout` : **Đăng xuất** (Xóa session/token trên App).
+- [ ] **UI Logic**: Chỉ hiển thị nút **Đăng xuất** và **Đổi mật khẩu** khi đã đăng nhập thành công.
 
 ---
 
-## 📦 Module 3: Giỏ hàng (Cart System)
-*Dành riêng cho Khách hàng mua sắm*
+## 📦 Module 2: Trang chủ & Sản phẩm (Home & Perfumes)
+*Hiển thị sản phẩm và các bộ lọc cho User*
 
-- [ ] `POST /api/cart/add` : Thêm nước hoa vào giỏ (Xử lý cộng dồn nếu sản phẩm đã có).
-- [ ] `GET /api/cart/:userId` : Lấy danh sách sản phẩm đang nằm trong giỏ.
-- [ ] `PUT /api/cart/update` : Cập nhật số lượng (+ hoặc -) trực tiếp trong giỏ hàng.
-- [ ] `DELETE /api/cart/remove/:cartId` : Xóa một sản phẩm cụ thể khỏi giỏ hàng.
-
----
-
-## 📦 Module 4: Đơn hàng & Thanh toán (Orders & Checkout)
-*User đặt hàng chọn lọc, Admin quản lý quy trình giao hàng*
-
-- [ ] `POST /api/orders/checkout` : **Thanh toán chọn lọc** (Chuyển các món được tick chọn từ Cart sang Orders).
-- [ ] `GET /api/orders/user/:userId` : Khách hàng xem lịch sử các đơn hàng đã đặt.
-- [ ] `GET /api/orders/admin/all` : **(Admin)** Xem toàn bộ đơn hàng của tất cả khách hàng.
-- [ ] `PUT /api/orders/status` : **(Admin)** Duyệt đơn (Đổi trạng thái: Chờ duyệt -> Đang giao -> Thành công).
+- [x] `GET /api/perfumes` : Mặc định hiển thị tất cả sản phẩm.
+- [x] `GET /api/perfumes?gender=Men` : Lọc nước hoa nam.
+- [x] `GET /api/perfumes?gender=Women` : Lọc nước hoa nữ.
+- [x] `GET /api/perfumes?gender=Unisex` : Lọc nước hoa Unisex.
+- [ ] `GET /api/perfumes?search=...` : Tìm kiếm theo Tên, Thương hiệu hoặc Giá.
+- [x] `GET /api/perfumes/:id` : Xem chi tiết sản phẩm.
 
 ---
 
-## 📦 Module 5: Thống kê & Quản trị (Admin Dashboard)
-*Dành riêng cho Quản trị viên*
+## 📦 Module 3: Hệ thống Yêu thích (Favorites)
+*Lưu trữ các sản phẩm quan tâm (Tab Yêu thích ở Footer)*
 
-- [ ] `GET /api/admin/revenue` : Tính tổng doanh thu từ các đơn hàng thành công.
-- [ ] `GET /api/admin/users` : Xem danh sách tất cả người dùng trong hệ thống.
-- [ ] `DELETE /api/admin/users/:id` : Xóa hoặc vô hiệu hóa tài khoản khách hàng.
+- [ ] `POST /api/favorites` : Thêm sản phẩm vào danh sách yêu thích.
+- [ ] `GET /api/favorites/:userId` : Hiển thị các sản phẩm User đã "thả tim".
+- [ ] `DELETE /api/favorites/:id` : Xóa khỏi danh sách yêu thích.
 
 ---
-*Ghi chú: [ ] = Chưa làm, [x] = Đã hoàn thành.*
+
+## 📦 Module 4: Giỏ hàng (Cart System)
+*Xử lý trung gian trước khi thanh toán*
+
+- [ ] `POST /api/cart/add` : Thêm sản phẩm vào giỏ hàng.
+- [ ] `GET /api/cart/:userId` : Xem danh sách sản phẩm trong giỏ.
+- [ ] `PUT /api/cart/update` : Cập nhật số lượng sản phẩm.
+- [ ] `DELETE /api/cart/:cartId` : Xóa sản phẩm khỏi giỏ.
+
+---
+
+## 📦 Module 5: Đơn hàng & Lịch sử (Orders & History)
+*Theo dõi trạng thái và lịch sử đặt hàng (Tab Lịch sử ở Footer)*
+
+- [x] `POST /api/checkout` : Thanh toán (Chốt đơn, trừ kho, xóa giỏ).
+- [x] `GET /api/orders/user/:userId` : Xem tất cả đơn hàng (Mặc định hiển thị 'All').
+- [ ] `GET /api/orders/user/:userId?status=...` : Lọc đơn hàng theo trạng thái (Chờ duyệt, Đang giao, Thành công, Đã hủy).
+- [ ] `GET /api/orders/detail/:orderId` : Xem chi tiết các món trong đơn hàng cũ.
+
+---
+
+## 📦 Module 6: Quản trị viên (Admin Management)
+*Dành riêng cho người quản lý (Role: admin)*
+
+- [ ] **Quản lý sản phẩm:**
+    - [x] `POST /api/perfumes` : Thêm nước hoa mới.
+    - [ ] `PUT /api/perfumes/:id` : Chỉnh sửa thông tin/số lượng.
+    - [ ] `DELETE /api/perfumes/:id` : Xóa sản phẩm khỏi cửa hàng.
+- [ ] **Quản lý đơn hàng:**
+    - [ ] `GET /api/admin/orders` : Xem toàn bộ đơn hàng của khách hàng.
+    - [ ] `PUT /api/admin/orders/status` : Duyệt đơn và cập nhật trạng thái vận chuyển.
+- [ ] **Quản lý khách hàng:**
+    - [ ] `GET /api/admin/users` : Xem danh sách tất cả tài khoản khách hàng.
+    - [ ] `DELETE /api/admin/users/:id` : Khóa hoặc xóa tài khoản khách hàng.
+- [ ] **Thống kê:**
+    - [ ] `GET /api/admin/revenue` : Thống kê doanh thu theo thời gian.
+
+---
+*Ghi chú: [x] = Đã có code xử lý, [ ] = Cần thực hiện tiếp.*

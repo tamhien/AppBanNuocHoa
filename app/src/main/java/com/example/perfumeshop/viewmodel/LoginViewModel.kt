@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.perfumeshop.api.RetrofitClient
 import com.example.perfumeshop.model.LoginRequest
 import com.example.perfumeshop.utils.HashUtils
+import com.example.perfumeshop.utils.SessionManager
 import kotlinx.coroutines.launch
 
 class LoginViewModel : ViewModel() {
@@ -18,17 +19,12 @@ class LoginViewModel : ViewModel() {
     var errorMessage by mutableStateOf<String?>(null)
         private set
 
-    fun onUsernameChange(newValue: String) {
-        username = newValue
-    }
+    fun onUsernameChange(newValue: String) { username = newValue }
+    fun onPasswordChange(newValue: String) { password = newValue }
 
-    fun onPasswordChange(newValue: String) {
-        password = newValue
-    }
-
-    fun login(onSuccess: (String) -> Unit) {
+    fun login(sessionManager: SessionManager, onSuccess: (String) -> Unit) {
         if (username.isEmpty() || password.isEmpty()) {
-            errorMessage = "Vui lòng nhập đầy đủ thông tin"
+            errorMessage = "Vui lòng nhập Tên đăng nhập và Mật khẩu"
             return
         }
 
@@ -42,7 +38,13 @@ class LoginViewModel : ViewModel() {
 
                 if (response.isSuccessful) {
                     val body = response.body()
-                    if (body?.success == true) {
+                    if (body?.success == true && body.userId != null) {
+                        // Lưu phiên đăng nhập
+                        sessionManager.saveSession(
+                            userId = body.userId,
+                            role = body.role ?: "user",
+                            fullName = body.fullName ?: ""
+                        )
                         onSuccess(body.role ?: "user")
                     } else {
                         errorMessage = body?.message ?: "Sai tên đăng nhập hoặc mật khẩu"
