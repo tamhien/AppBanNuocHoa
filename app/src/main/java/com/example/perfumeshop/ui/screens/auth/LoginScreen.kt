@@ -1,7 +1,8 @@
-package com.example.perfumeshop.ui.screens
+package com.example.perfumeshop.ui.screens.auth
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
@@ -11,6 +12,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -41,11 +44,13 @@ fun LoginScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Image(
-            painter = painterResource(id = R.drawable.ic_launcher_foreground),
+            painter = painterResource(id = R.drawable.img_1),
             contentDescription = "Store Logo",
             modifier = Modifier
-                .size(120.dp)
                 .padding(bottom = 16.dp)
+                .size(120.dp)
+                .clip(CircleShape),
+            contentScale = ContentScale.Crop
         )
 
         Text(text = "Đăng Nhập", fontSize = 28.sp, style = MaterialTheme.typography.headlineLarge)

@@ -50,7 +50,17 @@ class LoginViewModel : ViewModel() {
                         errorMessage = body?.message ?: "Sai tên đăng nhập hoặc mật khẩu"
                     }
                 } else {
-                    errorMessage = "Lỗi Server (${response.code()})"
+                    val errorBody = response.errorBody()?.string()
+                    errorMessage = if (errorBody != null) {
+                        try {
+                            val errorObj = com.google.gson.Gson().fromJson(errorBody, com.example.perfumeshop.model.AuthResponse::class.java)
+                            errorObj.message
+                        } catch (e: Exception) {
+                            "Lỗi Server (${response.code()})"
+                        }
+                    } else {
+                        "Lỗi Server (${response.code()})"
+                    }
                 }
             } catch (e: Exception) {
                 errorMessage = "Lỗi kết nối: ${e.localizedMessage}"

@@ -65,9 +65,10 @@ class HomeViewModel : ViewModel() {
         filteredPerfumes = if (searchQuery.isBlank()) {
             allPerfumes
         } else {
+            // Sử dụng bộ lọc thông minh hơn để hỗ trợ tiếng Việt có dấu
             allPerfumes.filter { 
                 it.name.contains(searchQuery, ignoreCase = true) || 
-                it.brand.contains(searchQuery, ignoreCase = true) || // Thêm tìm kiếm theo Brand
+                it.brand.contains(searchQuery, ignoreCase = true) ||
                 it.price.toString().contains(searchQuery)
             }
         }

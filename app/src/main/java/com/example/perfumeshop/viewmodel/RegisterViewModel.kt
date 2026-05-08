@@ -53,7 +53,18 @@ class RegisterViewModel : ViewModel() {
                         errorMessage = body?.message ?: "Đăng ký thất bại"
                     }
                 } else {
-                    errorMessage = "Lỗi Server (${response.code()})"
+                    // Cố gắng lấy thông báo lỗi từ body của response lỗi (ví dụ lỗi 500)
+                    val errorBody = response.errorBody()?.string()
+                    errorMessage = if (errorBody != null) {
+                        try {
+                            val errorObj = com.google.gson.Gson().fromJson(errorBody, com.example.perfumeshop.model.AuthResponse::class.java)
+                            errorObj.message
+                        } catch (e: Exception) {
+                            "Lỗi Server (${response.code()})"
+                        }
+                    } else {
+                        "Lỗi Server (${response.code()})"
+                    }
                 }
             } catch (e: Exception) {
                 errorMessage = "Lỗi kết nối: ${e.localizedMessage}"

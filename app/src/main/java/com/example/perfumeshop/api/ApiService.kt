@@ -25,4 +25,39 @@ interface ApiService {
     // Đổi mật khẩu
     @PUT("api/change-password/{id}")
     suspend fun changePassword(@Path("id") userId: Int, @Body request: ChangePasswordRequest): Response<BaseResponse>
+
+    // --- ADMIN APIs ---
+    
+    // Quản lý sản phẩm
+    @POST("api/perfumes")
+    suspend fun addPerfume(@Body perfume: Perfume): Response<BaseResponse>
+
+    @PUT("api/perfumes/{id}")
+    suspend fun updatePerfume(@Path("id") id: Int, @Body perfume: Perfume): Response<BaseResponse>
+
+    @DELETE("api/perfumes/{id}")
+    suspend fun deletePerfume(@Path("id") id: Int): Response<BaseResponse>
+
+    // Quản lý đơn hàng
+    @GET("api/admin/orders")
+    suspend fun getAllOrders(): Response<List<Order>>
+
+    @PUT("api/admin/orders/status")
+    suspend fun updateOrderStatus(@Body request: UpdateOrderStatusRequest): Response<BaseResponse>
+
+    // Quản lý khách hàng
+    @GET("api/admin/users")
+    suspend fun getAllUsers(): Response<List<UserResponse>>
+
+    @DELETE("api/admin/users/{id}")
+    suspend fun deleteUser(@Path("id") userId: Int): Response<BaseResponse>
+
+    // Thống kê
+    @GET("api/admin/revenue")
+    suspend fun getRevenue(): Response<RevenueResponse>
+
+    // Upload ảnh
+    @Multipart
+    @POST("api/upload")
+    suspend fun uploadImage(@Part image: okhttp3.MultipartBody.Part): Response<UploadResponse>
 }

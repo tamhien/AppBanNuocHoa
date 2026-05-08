@@ -4,10 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.perfumeshop.ui.screens.LoginScreen
-import com.example.perfumeshop.ui.screens.RegisterScreen
-import com.example.perfumeshop.ui.screens.HomeScreen
-import com.example.perfumeshop.ui.screens.AdminDashboardScreen
+import com.example.perfumeshop.ui.screens.auth.LoginScreen
+import com.example.perfumeshop.ui.screens.auth.RegisterScreen
+import com.example.perfumeshop.ui.screens.user.HomeScreen
+import com.example.perfumeshop.ui.screens.admin.AdminDashboardScreen
 
 @Composable
 fun NavGraph() {

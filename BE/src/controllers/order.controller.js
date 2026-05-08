@@ -31,6 +31,47 @@ exports.checkout = async (req, res) => {
     }
 };
 
+// Admin: Lấy tất cả đơn hàng
+exports.getAllOrders = async (req, res) => {
+    try {
+        const query = `
+            SELECT o.*, u.full_name
+            FROM Orders o
+            JOIN Users u ON o.user_id = u.user_id
+            ORDER BY o.order_date DESC
+        `;
+        const [rows] = await db.query(query);
+        res.json(rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+// Admin: Cập nhật trạng thái
+exports.updateOrderStatus = async (req, res) => {
+    const { order_id, status } = req.body;
+    try {
+        await db.query("UPDATE Orders SET status = ? WHERE order_id = ?", [status, order_id]);
+        res.json({ success: true, message: "Cập nhật trạng thái thành công" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+// Admin: Thống kê doanh thu
+exports.getRevenue = async (req, res) => {
+    try {
+        const [revenue] = await db.query("SELECT SUM(total_amount) as total_revenue, COUNT(*) as order_count FROM Orders WHERE status = 'Completed'");
+        res.json({
+            success: true,
+            total_revenue: revenue[0].total_revenue || 0,
+            order_count: revenue[0].order_count || 0
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
 // Xem lịch sử đơn hàng của User
 exports.getUserOrders = async (req, res) => {
     try {

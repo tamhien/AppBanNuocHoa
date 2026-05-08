@@ -6,8 +6,8 @@
 *Quản lý người dùng, phân quyền và hiển thị theo trạng thái đăng nhập*
 
 ### 🔑 Authentication (Tại màn hình Login/Register)
-- [x] `POST /api/register` : Đăng ký tài khoản (Role mặc định là 'user', gửi Password đã Hash).
-- [x] `POST /api/login` : Đăng nhập, trả về Role ('admin'/'user').
+- [ x] `POST /api/register` : Đăng ký tài khoản (Role mặc định là 'user', gửi Password đã Hash).
+- [ x] `POST /api/login` : Đăng nhập, trả về Role ('admin'/'user').
 - [ ] `POST /api/forgot-password` : **Quên mật khẩu** (Xử lý tại màn hình Login).
 - [ ] **UI Logic**: Hiển thị nút **Đăng nhập / Đăng ký** khi người dùng chưa đăng nhập.
 
@@ -23,12 +23,12 @@
 ## 📦 Module 2: Trang chủ & Sản phẩm (Home & Perfumes)
 *Hiển thị sản phẩm và các bộ lọc cho User*
 
-- [x] `GET /api/perfumes` : Mặc định hiển thị tất cả sản phẩm.
-- [x] `GET /api/perfumes?gender=Men` : Lọc nước hoa nam.
-- [x] `GET /api/perfumes?gender=Women` : Lọc nước hoa nữ.
-- [x] `GET /api/perfumes?gender=Unisex` : Lọc nước hoa Unisex.
-- [ ] `GET /api/perfumes?search=...` : Tìm kiếm theo Tên, Thương hiệu hoặc Giá.
-- [x] `GET /api/perfumes/:id` : Xem chi tiết sản phẩm.
+- [ x] `GET /api/perfumes` : Mặc định hiển thị tất cả sản phẩm.
+- [ x] `GET /api/perfumes?gender=Men` : Lọc nước hoa nam.
+- [ x] `GET /api/perfumes?gender=Women` : Lọc nước hoa nữ.
+- [ x] `GET /api/perfumes?gender=Unisex` : Lọc nước hoa Unisex.
+- [ x] `GET /api/perfumes?search=...` : Tìm kiếm theo Tên, Thương hiệu hoặc Giá.
+- [ ] `GET /api/perfumes/:id` : Xem chi tiết sản phẩm.
 
 ---
 
@@ -65,9 +65,9 @@
 *Dành riêng cho người quản lý (Role: admin)*
 
 - [ ] **Quản lý sản phẩm:**
-    - [x] `POST /api/perfumes` : Thêm nước hoa mới.
-    - [ ] `PUT /api/perfumes/:id` : Chỉnh sửa thông tin/số lượng.
-    - [ ] `DELETE /api/perfumes/:id` : Xóa sản phẩm khỏi cửa hàng.
+    - [ x] `POST /api/perfumes` : Thêm nước hoa mới.
+    - [ x] `PUT /api/perfumes/:id` : Chỉnh sửa thông tin/số lượng.
+    - [ x] `DELETE /api/perfumes/:id` : Xóa sản phẩm khỏi cửa hàng.
 - [ ] **Quản lý đơn hàng:**
     - [ ] `GET /api/admin/orders` : Xem toàn bộ đơn hàng của khách hàng.
     - [ ] `PUT /api/admin/orders/status` : Duyệt đơn và cập nhật trạng thái vận chuyển.

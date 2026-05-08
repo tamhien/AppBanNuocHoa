@@ -1,4 +1,4 @@
-package com.example.perfumeshop.ui.screens
+package com.example.perfumeshop.ui.screens.user
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -10,7 +10,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -25,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.example.perfumeshop.api.RetrofitClient
 import com.example.perfumeshop.model.Perfume
 import com.example.perfumeshop.viewmodel.HomeViewModel
 import java.util.Locale
@@ -39,7 +39,6 @@ fun HomeScreen(
 
     Scaffold(
         topBar = {
-            // Thêm statusBarsPadding() để tránh bị che bởi thanh trạng thái hệ thống (giờ, pin)
             Column(modifier = Modifier
                 .statusBarsPadding()
                 .background(MaterialTheme.colorScheme.surface)) {
@@ -58,7 +57,7 @@ fun HomeScreen(
                                 )
                             )
                         } else {
-                            Text("Shop Nước Hoa", fontWeight = FontWeight.Bold, fontSize = 22.sp)
+                            Text("PrincePhom Shop", fontWeight = FontWeight.Bold, fontSize = 22.sp)
                         }
                     },
                     actions = {
@@ -114,7 +113,6 @@ fun HomeScreen(
         }
     ) { padding ->
         Column(modifier = Modifier.padding(padding).fillMaxSize()) {
-            // Danh sách các nút chọn loại (Nam, Nữ, Unisex, Tất cả)
             CategoryTabs(
                 selectedCategory = viewModel.currentGender,
                 onCategorySelected = { viewModel.fetchPerfumes(it) }
@@ -179,9 +177,13 @@ fun ProductItem(perfume: Perfume, isFavorite: Boolean, onFavoriteToggle: () -> U
     Card(shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = Color.Transparent), modifier = Modifier.fillMaxWidth()) {
         Column {
             Box(modifier = Modifier.fillMaxWidth().height(180.dp).clip(RoundedCornerShape(16.dp)).background(Color(0xFFF0F0F0))) {
-                AsyncImage(model = perfume.imageUrl, contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                AsyncImage(
+                    model = RetrofitClient.getFullImageUrl(perfume.imageUrl),
+                    contentDescription = null, 
+                    modifier = Modifier.fillMaxSize(), 
+                    contentScale = ContentScale.Crop
+                )
                 
-                // Hiển thị giới tính (Nam/Nữ/Unisex)
                 Surface(color = Color.Black.copy(alpha = 0.6f), shape = RoundedCornerShape(4.dp), modifier = Modifier.padding(8.dp)) {
                     val genderLabel = when(perfume.gender) {
                         "Men" -> "Nam"
@@ -191,15 +193,14 @@ fun ProductItem(perfume: Perfume, isFavorite: Boolean, onFavoriteToggle: () -> U
                     Text(text = genderLabel, color = Color.White, fontSize = 10.sp, modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp))
                 }
 
-                // Nút yêu thích
                 IconButton(onClick = onFavoriteToggle, modifier = Modifier.align(Alignment.TopEnd).padding(4.dp)) {
                     Icon(imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder, contentDescription = null, tint = if (isFavorite) Color.Red else Color.Gray)
                 }
             }
             Spacer(Modifier.height(8.dp))
             Text(text = perfume.name.uppercase(), fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(text = perfume.brand, style = MaterialTheme.typography.bodySmall, color = Color.Gray) // Hiển thị Brand
-            Text(text = String.format(Locale.getDefault(), "%,.0f VNĐ", perfume.price), color = Color.DarkGray, fontSize = 14.sp)
+            Text(text = perfume.brand, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+            Text(text = "${perfume.price} $", color = Color.DarkGray, fontSize = 14.sp)
         }
     }
 }
