@@ -3,10 +3,21 @@ const db = require('../config/db');
 // Lấy tất cả sản phẩm
 exports.getAllPerfumes = async (req, res) => {
     const { gender } = req.query;
-    let query = "SELECT * FROM Perfumes";
+    let query = `
+        SELECT p.*, COALESCE(SUM(od.quantity), 0) as sold_count
+        FROM Perfumes p
+        LEFT JOIN OrderDetails od ON p.perfume_id = od.perfume_id
+        GROUP BY p.perfume_id
+    `;
     let params = [];
     if (gender) {
-        query += " WHERE gender = ?";
+        query = `
+            SELECT p.*, COALESCE(SUM(od.quantity), 0) as sold_count
+            FROM Perfumes p
+            LEFT JOIN OrderDetails od ON p.perfume_id = od.perfume_id
+            WHERE p.gender = ?
+            GROUP BY p.perfume_id
+        `;
         params.push(gender);
     }
     try {

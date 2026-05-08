@@ -6,7 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.perfumeshop.ui.screens.auth.LoginScreen
 import com.example.perfumeshop.ui.screens.auth.RegisterScreen
-import com.example.perfumeshop.ui.screens.user.HomeScreen
+import com.example.perfumeshop.ui.screens.user.UserMainScreen
 import com.example.perfumeshop.ui.screens.admin.AdminDashboardScreen
 
 @Composable
@@ -40,10 +40,22 @@ fun NavGraph() {
             )
         }
         composable(Screen.Home.route) {
-            HomeScreen()
+            UserMainScreen(
+                onLogout = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(Screen.Home.route) { inclusive = true }
+                    }
+                }
+            )
         }
         composable(Screen.AdminDashboard.route) {
-            AdminDashboardScreen()
+            AdminDashboardScreen(
+                onLogout = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(Screen.AdminDashboard.route) { inclusive = true }
+                    }
+                }
+            )
         }
     }
 }

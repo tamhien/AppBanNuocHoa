@@ -4,6 +4,7 @@ const auth = require('../controllers/auth.controller');
 const perfume = require('../controllers/perfume.controller');
 const order = require('../controllers/order.controller');
 const upload = require('../controllers/upload.controller');
+const favorite = require('../controllers/favorite.controller');
 
 // Auth
 router.post('/login', auth.login);
@@ -31,5 +32,10 @@ router.delete('/admin/users/:id', auth.deleteUser);
 
 // Upload ảnh
 router.post('/upload', upload.uploadImage);
+
+// Favorites
+router.post('/favorites', favorite.addFavorite);
+router.get('/favorites/:userId', favorite.getFavorites);
+router.delete('/favorites/:userId/:perfumeId', favorite.removeFavorite);
 
 module.exports = router;

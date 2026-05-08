@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.perfumeshop.api.RetrofitClient
 import com.example.perfumeshop.model.Perfume
+import com.example.perfumeshop.model.UserResponse
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -24,10 +25,16 @@ class AdminViewModel : ViewModel() {
     private val _perfumes = MutableStateFlow<List<Perfume>>(emptyList())
     val perfumes: StateFlow<List<Perfume>> = _perfumes
 
+    private val _users = MutableStateFlow<List<UserResponse>>(emptyList())
+    val users: StateFlow<List<UserResponse>> = _users
+
     var isLoading by mutableStateOf(false)
     var errorMessage by mutableStateOf<String?>(null)
 
-    init { loadPerfumes() }
+    init { 
+        loadPerfumes()
+        loadUsers()
+    }
 
     fun loadPerfumes() {
         viewModelScope.launch {
@@ -37,6 +44,19 @@ class AdminViewModel : ViewModel() {
                 if (response.isSuccessful) {
                     _perfumes.value = response.body() ?: emptyList()
                 } else { errorMessage = "Lỗi tải SP: ${response.code()}" }
+            } catch (e: Exception) { errorMessage = e.message }
+            finally { isLoading = false }
+        }
+    }
+
+    fun loadUsers() {
+        viewModelScope.launch {
+            isLoading = true
+            try {
+                val response = apiService.getAllUsers()
+                if (response.isSuccessful) {
+                    _users.value = response.body() ?: emptyList()
+                } else { errorMessage = "Lỗi tải khách hàng: ${response.code()}" }
             } catch (e: Exception) { errorMessage = e.message }
             finally { isLoading = false }
         }
@@ -99,6 +119,16 @@ class AdminViewModel : ViewModel() {
             try {
                 val response = apiService.deletePerfume(id)
                 if (response.isSuccessful) loadPerfumes()
+            } catch (e: Exception) { errorMessage = e.message }
+        }
+    }
+
+    fun deleteUser(userId: Int) {
+        viewModelScope.launch {
+            try {
+                val response = apiService.deleteUser(userId)
+                if (response.isSuccessful) loadUsers()
+                else { errorMessage = "Không thể xóa người dùng" }
             } catch (e: Exception) { errorMessage = e.message }
         }
     }

@@ -2,11 +2,6 @@ package com.example.perfumeshop.ui.screens.user
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -19,7 +14,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -27,15 +21,16 @@ import coil.compose.AsyncImage
 import com.example.perfumeshop.api.RetrofitClient
 import com.example.perfumeshop.model.Perfume
 import com.example.perfumeshop.viewmodel.HomeViewModel
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(
+fun UserMainScreen(
+    onLogout: () -> Unit,
     viewModel: HomeViewModel = viewModel()
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
     var isSearchExpanded by remember { mutableStateOf(false) }
+    var selectedProduct by remember { mutableStateOf<Perfume?>(null) }
 
     Scaffold(
         topBar = {
@@ -112,95 +107,88 @@ fun HomeScreen(
             }
         }
     ) { padding ->
-        Column(modifier = Modifier.padding(padding).fillMaxSize()) {
-            CategoryTabs(
-                selectedCategory = viewModel.currentGender,
-                onCategorySelected = { viewModel.fetchPerfumes(it) }
-            )
-
-            if (viewModel.isLoading) {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
-            } else if (viewModel.errorMessage != null) {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(viewModel.errorMessage!!, color = MaterialTheme.colorScheme.error)
-                }
-            } else {
-                ProductGrid(
-                    perfumes = viewModel.filteredPerfumes,
-                    favorites = viewModel.favorites,
-                    onFavoriteToggle = { viewModel.toggleFavorite(it) }
-                )
+        Box(modifier = Modifier.padding(padding)) {
+            when (selectedTab) {
+                0 -> UserHomeScreen(viewModel, onProductClick = { selectedProduct = it })
+                1 -> UserFavoritesScreen(viewModel, onProductClick = { selectedProduct = it })
+                2 -> UserHistoryScreen(viewModel)
+                3 -> UserAccountScreen(viewModel, onLogout = onLogout)
             }
         }
     }
-}
 
-@Composable
-fun CategoryTabs(selectedCategory: String?, onCategorySelected: (String?) -> Unit) {
-    val categories = listOf(
-        "Tất cả" to null, 
-        "Nước hoa nam" to "Men", 
-        "Nước hoa nữ" to "Women",
-        "Unisex" to "Unisex"
-    )
-    LazyRow(contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        items(categories) { (label, value) ->
-            FilterChip(
-                selected = selectedCategory == value,
-                onClick = { onCategorySelected(value) },
-                label = { Text(label) },
-                shape = RoundedCornerShape(20.dp)
-            )
-        }
-    }
-}
-
-@Composable
-fun ProductGrid(perfumes: List<Perfume>, favorites: Set<Int>, onFavoriteToggle: (Int) -> Unit) {
-    if (perfumes.isEmpty()) {
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("Không tìm thấy sản phẩm nào")
-        }
-    } else {
-        LazyVerticalGrid(columns = GridCells.Fixed(2), contentPadding = PaddingValues(16.dp), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            items(perfumes) { perfume ->
-                ProductItem(perfume, favorites.contains(perfume.id), onFavoriteToggle = { onFavoriteToggle(perfume.id) })
+    // Dialog Chi tiết sản phẩm
+    selectedProduct?.let { perfume ->
+        ProductDetailDialog(
+            perfume = perfume,
+            onDismiss = { selectedProduct = null },
+            onAddToCart = { qty ->
+                // Xử lý thêm vào giỏ hàng ở đây
+                selectedProduct = null
             }
-        }
+        )
     }
 }
 
 @Composable
-fun ProductItem(perfume: Perfume, isFavorite: Boolean, onFavoriteToggle: () -> Unit) {
-    Card(shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = Color.Transparent), modifier = Modifier.fillMaxWidth()) {
-        Column {
-            Box(modifier = Modifier.fillMaxWidth().height(180.dp).clip(RoundedCornerShape(16.dp)).background(Color(0xFFF0F0F0))) {
+fun ProductDetailDialog(
+    perfume: Perfume,
+    onDismiss: () -> Unit,
+    onAddToCart: (Int) -> Unit
+) {
+    var quantity by remember { mutableIntStateOf(1) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            Button(onClick = { onAddToCart(quantity) }) {
+                Text("Thêm vào giỏ")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Hủy")
+            }
+        },
+        title = { Text(perfume.name, fontWeight = FontWeight.Bold) },
+        text = {
+            Column(modifier = Modifier.fillMaxWidth()) {
                 AsyncImage(
                     model = RetrofitClient.getFullImageUrl(perfume.imageUrl),
-                    contentDescription = null, 
-                    modifier = Modifier.fillMaxSize(), 
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .clip(RoundedCornerShape(8.dp)),
                     contentScale = ContentScale.Crop
                 )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(text = "Thương hiệu: ${perfume.brand}", style = MaterialTheme.typography.bodyMedium)
+                Text(text = "Giá: ${perfume.price} $", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
                 
-                Surface(color = Color.Black.copy(alpha = 0.6f), shape = RoundedCornerShape(4.dp), modifier = Modifier.padding(8.dp)) {
-                    val genderLabel = when(perfume.gender) {
-                        "Men" -> "Nam"
-                        "Women" -> "Nữ"
-                        else -> "Unisex"
-                    }
-                    Text(text = genderLabel, color = Color.White, fontSize = 10.sp, modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp))
+                Row(modifier = Modifier.padding(vertical = 8.dp)) {
+                    Text(text = "Còn lại: ${perfume.stockQuantity}", style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f))
+                    Text(text = "Đã bán: ${perfume.soldCount}", style = MaterialTheme.typography.bodySmall)
                 }
 
-                IconButton(onClick = onFavoriteToggle, modifier = Modifier.align(Alignment.TopEnd).padding(4.dp)) {
-                    Icon(imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder, contentDescription = null, tint = if (isFavorite) Color.Red else Color.Gray)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = perfume.description, style = MaterialTheme.typography.bodySmall)
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    IconButton(onClick = { if (quantity > 1) quantity-- }) {
+                        Icon(Icons.Default.Remove, null)
+                    }
+                    Text(text = quantity.toString(), modifier = Modifier.padding(horizontal = 16.dp), style = MaterialTheme.typography.titleMedium)
+                    IconButton(onClick = { quantity++ }) {
+                        Icon(Icons.Default.Add, null)
+                    }
                 }
             }
-            Spacer(Modifier.height(8.dp))
-            Text(text = perfume.name.uppercase(), fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(text = perfume.brand, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
-            Text(text = "${perfume.price} $", color = Color.DarkGray, fontSize = 14.sp)
         }
-    }
+    )
 }

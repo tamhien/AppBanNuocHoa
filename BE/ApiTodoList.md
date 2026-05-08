@@ -28,16 +28,16 @@
 - [ x] `GET /api/perfumes?gender=Women` : Lọc nước hoa nữ.
 - [ x] `GET /api/perfumes?gender=Unisex` : Lọc nước hoa Unisex.
 - [ x] `GET /api/perfumes?search=...` : Tìm kiếm theo Tên, Thương hiệu hoặc Giá.
-- [ ] `GET /api/perfumes/:id` : Xem chi tiết sản phẩm.
+- [ x] `GET /api/perfumes/:id` : Xem chi tiết sản phẩm.
 
 ---
 
 ## 📦 Module 3: Hệ thống Yêu thích (Favorites)
 *Lưu trữ các sản phẩm quan tâm (Tab Yêu thích ở Footer)*
 
-- [ ] `POST /api/favorites` : Thêm sản phẩm vào danh sách yêu thích.
-- [ ] `GET /api/favorites/:userId` : Hiển thị các sản phẩm User đã "thả tim".
-- [ ] `DELETE /api/favorites/:id` : Xóa khỏi danh sách yêu thích.
+- [ x] `POST /api/favorites` : Thêm sản phẩm vào danh sách yêu thích.
+- [ x] `GET /api/favorites/:userId` : Hiển thị các sản phẩm User đã "thả tim".
+- [ x] `DELETE /api/favorites/:id` : Xóa khỏi danh sách yêu thích.
 
 ---
 
@@ -54,8 +54,8 @@
 ## 📦 Module 5: Đơn hàng & Lịch sử (Orders & History)
 *Theo dõi trạng thái và lịch sử đặt hàng (Tab Lịch sử ở Footer)*
 
-- [x] `POST /api/checkout` : Thanh toán (Chốt đơn, trừ kho, xóa giỏ).
-- [x] `GET /api/orders/user/:userId` : Xem tất cả đơn hàng (Mặc định hiển thị 'All').
+- [ ] `POST /api/checkout` : Thanh toán (Chốt đơn, trừ kho, xóa giỏ).
+- [ ] `GET /api/orders/user/:userId` : Xem tất cả đơn hàng (Mặc định hiển thị 'All').
 - [ ] `GET /api/orders/user/:userId?status=...` : Lọc đơn hàng theo trạng thái (Chờ duyệt, Đang giao, Thành công, Đã hủy).
 - [ ] `GET /api/orders/detail/:orderId` : Xem chi tiết các món trong đơn hàng cũ.
 
@@ -72,8 +72,8 @@
     - [ ] `GET /api/admin/orders` : Xem toàn bộ đơn hàng của khách hàng.
     - [ ] `PUT /api/admin/orders/status` : Duyệt đơn và cập nhật trạng thái vận chuyển.
 - [ ] **Quản lý khách hàng:**
-    - [ ] `GET /api/admin/users` : Xem danh sách tất cả tài khoản khách hàng.
-    - [ ] `DELETE /api/admin/users/:id` : Khóa hoặc xóa tài khoản khách hàng.
+    - [ x] `GET /api/admin/users` : Xem danh sách tất cả tài khoản khách hàng.
+    - [ x] `DELETE /api/admin/users/:id` : Khóa hoặc xóa tài khoản khách hàng.
 - [ ] **Thống kê:**
     - [ ] `GET /api/admin/revenue` : Thống kê doanh thu theo thời gian.
 

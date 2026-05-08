@@ -52,3 +52,8 @@ data class ChangePasswordRequest(
     @SerializedName("current_password") val currentPassword: String,
     @SerializedName("new_password") val newPassword: String
 )
+
+data class FavoriteRequest(
+    @SerializedName("user_id") val userId: Int,
+    @SerializedName("perfume_id") val perfumeId: Int
+)

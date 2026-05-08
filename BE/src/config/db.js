@@ -10,4 +10,28 @@ const pool = mysql.createPool({
     connectionLimit: 10
 });
 
-module.exports = pool.promise();
+const promisePool = pool.promise();
+
+// Tạo bảng Favorites nếu chưa có
+const initDB = async () => {
+    try {
+        await promisePool.query(`
+            CREATE TABLE IF NOT EXISTS Favorites (
+                favorite_id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
+                perfume_id INT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE KEY user_perfume (user_id, perfume_id),
+                FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+                FOREIGN KEY (perfume_id) REFERENCES Perfumes(perfume_id) ON DELETE CASCADE
+            )
+        `);
+        console.log("Database initialized (Favorites table checked)");
+    } catch (err) {
+        console.error("Lỗi khởi tạo DB:", err.message);
+    }
+};
+
+initDB();
+
+module.exports = promisePool;

@@ -10,5 +10,6 @@ data class Perfume(
     @SerializedName("price") val price: Double,
     @SerializedName("stock_quantity") val stockQuantity: Int,
     @SerializedName("image_url") val imageUrl: String,
-    @SerializedName("gender") val gender: String // Men, Women, Unisex
+    @SerializedName("gender") val gender: String, // Men, Women, Unisex
+    @SerializedName("sold_count") val soldCount: Int = 0
 )

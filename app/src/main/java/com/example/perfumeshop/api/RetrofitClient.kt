@@ -7,14 +7,15 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
-    const val BASE_URL = "http://10.0.2.2:3000/"
+    const val BASE_URL = "http://10.0.2.2:3000/api/"
 
     // Hàm tiện ích để lấy URL ảnh đầy đủ
     fun getFullImageUrl(relativeUrl: String?): String {
         if (relativeUrl.isNullOrBlank()) return ""
         if (relativeUrl.startsWith("http")) return relativeUrl
         val cleanPath = if (relativeUrl.startsWith("/")) relativeUrl.substring(1) else relativeUrl
-        return BASE_URL + cleanPath
+        // Sử dụng base URL gốc (không có /api/) cho ảnh nếu ảnh được lưu ở /uploads
+        return "http://10.0.2.2:3000/" + cleanPath
     }
 
     private val logging = HttpLoggingInterceptor().apply {
