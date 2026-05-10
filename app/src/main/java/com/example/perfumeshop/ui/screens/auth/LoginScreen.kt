@@ -29,6 +29,7 @@ import com.example.perfumeshop.viewmodel.LoginViewModel
 @Composable
 fun LoginScreen(
     onNavigateToRegister: () -> Unit,
+    onNavigateToForgotPassword: () -> Unit,
     onLoginSuccess: (String) -> Unit,
     viewModel: LoginViewModel = viewModel()
 ) {
@@ -84,6 +85,12 @@ fun LoginScreen(
             singleLine = true
         )
 
+        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
+            TextButton(onClick = onNavigateToForgotPassword) {
+                Text("Quên mật khẩu?", fontSize = 14.sp)
+            }
+        }
+
         if (viewModel.errorMessage != null) {
             Text(
                 text = viewModel.errorMessage!!, 
@@ -118,5 +125,5 @@ fun LoginScreen(
 @Preview(showBackground = true)
 @Composable
 fun LoginScreenPreview() {
-    LoginScreen(onNavigateToRegister = {}, onLoginSuccess = {})
+    LoginScreen(onNavigateToRegister = {}, onNavigateToForgotPassword = {}, onLoginSuccess = {})
 }

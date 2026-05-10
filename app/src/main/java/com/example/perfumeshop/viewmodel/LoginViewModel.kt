@@ -22,6 +22,30 @@ class LoginViewModel : ViewModel() {
     fun onUsernameChange(newValue: String) { username = newValue }
     fun onPasswordChange(newValue: String) { password = newValue }
 
+    fun forgotPassword(email: String, onResult: (String) -> Unit) {
+        if (username.isEmpty() || email.isEmpty()) {
+            errorMessage = "Vui lòng nhập Tên đăng nhập và Email"
+            return
+        }
+        isLoading = true
+        viewModelScope.launch {
+            try {
+                val response = RetrofitClient.instance.forgotPassword(
+                    com.example.perfumeshop.model.ForgotPasswordRequest(username, email)
+                )
+                if (response.isSuccessful) {
+                    onResult(response.body()?.message ?: "Reset thành công")
+                } else {
+                    errorMessage = "Thông tin không khớp"
+                }
+            } catch (e: Exception) {
+                errorMessage = "Lỗi kết nối"
+            } finally {
+                isLoading = false
+            }
+        }
+    }
+
     fun login(sessionManager: SessionManager, onSuccess: (String) -> Unit) {
         if (username.isEmpty() || password.isEmpty()) {
             errorMessage = "Vui lòng nhập Tên đăng nhập và Mật khẩu"

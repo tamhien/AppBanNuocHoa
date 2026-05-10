@@ -8,15 +8,15 @@
 ### 🔑 Authentication (Tại màn hình Login/Register)
 - [ x] `POST /api/register` : Đăng ký tài khoản (Role mặc định là 'user', gửi Password đã Hash).
 - [ x] `POST /api/login` : Đăng nhập, trả về Role ('admin'/'user').
-- [ ] `POST /api/forgot-password` : **Quên mật khẩu** (Xử lý tại màn hình Login).
-- [ ] **UI Logic**: Hiển thị nút **Đăng nhập / Đăng ký** khi người dùng chưa đăng nhập.
+- [ x] `POST /api/forgot-password` : **Quên mật khẩu** (sử dụng thư viện Nodemailer/kết nối từ Server Node.js của bạn tới máy chủ của Google (Gmail) thông qua giao thức SMTP (Simple Mail Transfer Protocol).
+- [ x] **UI Logic**: Hiển thị nút **Đăng nhập / Đăng ký** khi người dùng chưa đăng nhập.
 
 ### 👤 Account (Tại màn hình Trang chủ -> Tab Tài khoản)
-- [ ] `GET /api/profile/:id` : Lấy thông tin cá nhân (Tên, SĐT, Email, Địa chỉ) từ DB.
-- [ ] `PUT /api/profile/:id` : Cập nhật thông tin cá nhân cơ bản.
-- [ ] `PUT /api/change-password/:id` : **Đổi mật khẩu** (Yêu cầu: MK hiện tại, MK mới, Nhập lại MK mới).
-- [ ] `POST /api/logout` : **Đăng xuất** (Xóa session/token trên App).
-- [ ] **UI Logic**: Chỉ hiển thị nút **Đăng xuất** và **Đổi mật khẩu** khi đã đăng nhập thành công.
+- [ x] `GET /api/profile/:id` : Lấy thông tin cá nhân (Tên, SĐT, Email, Địa chỉ) từ DB.
+- [ x] `PUT /api/profile/:id` : Cập nhật thông tin cá nhân cơ bản.
+- [ x] `PUT /api/change-password/:id` : **Đổi mật khẩu** (Yêu cầu: MK hiện tại, MK mới, Nhập lại MK mới).
+- [ x] `POST /api/logout` : **Đăng xuất** (Xóa session/token trên App).
+- [ x] **UI Logic**: Chỉ hiển thị nút **Đăng xuất** và **Đổi mật khẩu** khi đã đăng nhập thành công.
 
 ---
 

@@ -7,6 +7,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.perfumeshop.ui.screens.auth.LoginScreen
 import com.example.perfumeshop.ui.screens.auth.RegisterScreen
 import com.example.perfumeshop.ui.screens.user.UserMainScreen
+import com.example.perfumeshop.ui.screens.user.PasswordResetScreen
 import com.example.perfumeshop.ui.screens.admin.AdminDashboardScreen
 
 @Composable
@@ -15,11 +16,12 @@ fun NavGraph() {
     
     NavHost(
         navController = navController,
-        startDestination = Screen.Login.route
+        startDestination = Screen.Home.route
     ) {
         composable(Screen.Login.route) {
             LoginScreen(
                 onNavigateToRegister = { navController.navigate(Screen.Register.route) },
+                onNavigateToForgotPassword = { navController.navigate(Screen.PasswordReset.route) },
                 onLoginSuccess = { role ->
                     if (role == "admin") {
                         navController.navigate(Screen.AdminDashboard.route) {
@@ -45,8 +47,14 @@ fun NavGraph() {
                     navController.navigate(Screen.Login.route) {
                         popUpTo(Screen.Home.route) { inclusive = true }
                     }
-                }
+                },
+                onNavigateToLogin = { navController.navigate(Screen.Login.route) },
+                onNavigateToRegister = { navController.navigate(Screen.Register.route) },
+                onNavigateToPasswordReset = { navController.navigate(Screen.PasswordReset.route) }
             )
+        }
+        composable(Screen.PasswordReset.route) {
+            PasswordResetScreen(onBack = { navController.popBackStack() })
         }
         composable(Screen.AdminDashboard.route) {
             AdminDashboardScreen(

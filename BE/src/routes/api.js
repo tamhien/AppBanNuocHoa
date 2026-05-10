@@ -9,6 +9,14 @@ const favorite = require('../controllers/favorite.controller');
 // Auth
 router.post('/login', auth.login);
 router.post('/register', auth.register);
+router.post('/forgot-password', auth.forgotPassword);
+router.post('/send-otp', auth.sendOTP);
+router.post('/reset-password-otp', auth.resetPasswordWithOTP);
+
+// Profile
+router.get('/profile/:id', auth.getProfile);
+router.put('/profile/:id', auth.updateProfile);
+router.put('/change-password/:id', auth.changePassword);
 
 // Perfumes
 router.get('/perfumes', perfume.getAllPerfumes);

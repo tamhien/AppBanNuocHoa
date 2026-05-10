@@ -26,11 +26,19 @@ import com.example.perfumeshop.viewmodel.HomeViewModel
 @Composable
 fun UserMainScreen(
     onLogout: () -> Unit,
+    onNavigateToLogin: () -> Unit,
+    onNavigateToRegister: () -> Unit,
+    onNavigateToPasswordReset: () -> Unit,
     viewModel: HomeViewModel = viewModel()
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
     var isSearchExpanded by remember { mutableStateOf(false) }
     var selectedProduct by remember { mutableStateOf<Perfume?>(null) }
+
+    // Cập nhật trạng thái session mỗi khi quay lại màn hình này
+    LaunchedEffect(Unit) {
+        viewModel.updateSession()
+    }
 
     Scaffold(
         topBar = {
@@ -112,7 +120,13 @@ fun UserMainScreen(
                 0 -> UserHomeScreen(viewModel, onProductClick = { selectedProduct = it })
                 1 -> UserFavoritesScreen(viewModel, onProductClick = { selectedProduct = it })
                 2 -> UserHistoryScreen(viewModel)
-                3 -> UserAccountScreen(viewModel, onLogout = onLogout)
+                3 -> UserAccountScreen(
+                    viewModel = viewModel,
+                    onLogout = onLogout,
+                    onNavigateToLogin = onNavigateToLogin,
+                    onNavigateToRegister = onNavigateToRegister,
+                    onNavigateToPasswordReset = onNavigateToPasswordReset
+                )
             }
         }
     }

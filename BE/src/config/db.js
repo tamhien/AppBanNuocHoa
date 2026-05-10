@@ -26,7 +26,17 @@ const initDB = async () => {
                 FOREIGN KEY (perfume_id) REFERENCES Perfumes(perfume_id) ON DELETE CASCADE
             )
         `);
-        console.log("Database initialized (Favorites table checked)");
+        // Tạo bảng VerificationCodes
+        await promisePool.query(`
+            CREATE TABLE IF NOT EXISTS VerificationCodes (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                email VARCHAR(255) NOT NULL,
+                code VARCHAR(6) NOT NULL,
+                expires_at TIMESTAMP NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        console.log("Database initialized (Favorites & VerificationCodes tables checked)");
     } catch (err) {
         console.error("Lỗi khởi tạo DB:", err.message);
     }

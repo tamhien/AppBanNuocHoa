@@ -57,3 +57,18 @@ data class FavoriteRequest(
     @SerializedName("user_id") val userId: Int,
     @SerializedName("perfume_id") val perfumeId: Int
 )
+
+data class ForgotPasswordRequest(
+    @SerializedName("username") val username: String,
+    @SerializedName("email") val email: String
+)
+
+data class SendOtpRequest(
+    @SerializedName("email") val email: String
+)
+
+data class ResetPasswordOtpRequest(
+    @SerializedName("email") val email: String,
+    @SerializedName("otp") val otp: String,
+    @SerializedName("newPassword") val newPassword: String
+)

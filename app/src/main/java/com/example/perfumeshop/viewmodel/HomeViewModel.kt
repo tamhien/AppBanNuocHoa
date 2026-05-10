@@ -34,9 +34,82 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     var searchQuery by mutableStateOf("")
         private set
 
+    var isLoggedIn by mutableStateOf(sessionManager.isLoggedIn())
+        private set
+
+    var userFullName by mutableStateOf(sessionManager.getFullName())
+        private set
+    
+    var userProfile by mutableStateOf<com.example.perfumeshop.model.UserResponse?>(null)
+        private set
+
     init {
         fetchPerfumes()
-        fetchFavorites()
+        if (isLoggedIn) {
+            fetchFavorites()
+            fetchUserProfile()
+        }
+    }
+
+    fun updateSession() {
+        isLoggedIn = sessionManager.isLoggedIn()
+        userFullName = sessionManager.getFullName()
+        if (isLoggedIn) {
+            fetchFavorites()
+            fetchUserProfile()
+        } else {
+            favoriteIds = emptySet()
+            favoritePerfumes = emptyList()
+            userProfile = null
+        }
+    }
+
+    fun fetchUserProfile() {
+        val userId = sessionManager.getUserId()
+        if (userId == -1) return
+        viewModelScope.launch {
+            try {
+                val response = apiService.getProfile(userId)
+                if (response.isSuccessful) userProfile = response.body()
+            } catch (e: Exception) {}
+        }
+    }
+
+    fun updateProfile(fullName: String, email: String, phone: String, address: String, onResult: (Boolean, String) -> Unit) {
+        val userId = sessionManager.getUserId()
+        viewModelScope.launch {
+            try {
+                val response = apiService.updateProfile(userId, com.example.perfumeshop.model.UpdateProfileRequest(fullName, email, phone, address))
+                if (response.isSuccessful) {
+                    sessionManager.saveSession(userId, sessionManager.getRole() ?: "user", fullName)
+                    userFullName = fullName
+                    fetchUserProfile()
+                    onResult(true, "Cập nhật thành công")
+                } else onResult(false, "Lỗi cập nhật")
+            } catch (e: Exception) { onResult(false, "Lỗi kết nối") }
+        }
+    }
+
+    fun changePassword(current: String, new: String, onResult: (Boolean, String) -> Unit) {
+        val userId = sessionManager.getUserId()
+        viewModelScope.launch {
+            try {
+                val response = apiService.changePassword(userId, com.example.perfumeshop.model.ChangePasswordRequest(
+                    com.example.perfumeshop.utils.HashUtils.sha256(current),
+                    com.example.perfumeshop.utils.HashUtils.sha256(new)
+                ))
+                if (response.isSuccessful) onResult(true, "Đổi mật khẩu thành công")
+                else {
+                    val errorMsg = if (response.code() == 400) "Mật khẩu hiện tại không đúng" else "Lỗi đổi mật khẩu"
+                    onResult(false, errorMsg)
+                }
+            } catch (e: Exception) { onResult(false, "Lỗi kết nối") }
+        }
+    }
+
+    fun logout() {
+        sessionManager.clearSession()
+        updateSession()
     }
 
     fun fetchPerfumes(gender: String? = null) {

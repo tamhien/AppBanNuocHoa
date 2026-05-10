@@ -8,6 +8,15 @@ interface ApiService {
     @POST("register")
     suspend fun register(@Body request: RegisterRequest): Response<AuthResponse>
 
+    @POST("forgot-password")
+    suspend fun forgotPassword(@Body request: ForgotPasswordRequest): Response<BaseResponse>
+
+    @POST("send-otp")
+    suspend fun sendOtp(@Body request: SendOtpRequest): Response<BaseResponse>
+
+    @POST("reset-password-otp")
+    suspend fun resetPasswordOtp(@Body request: ResetPasswordOtpRequest): Response<BaseResponse>
+
     @POST("login")
     suspend fun login(@Body request: LoginRequest): Response<AuthResponse>
 
