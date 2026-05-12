@@ -8,6 +8,7 @@ import com.example.perfumeshop.ui.screens.auth.LoginScreen
 import com.example.perfumeshop.ui.screens.auth.RegisterScreen
 import com.example.perfumeshop.ui.screens.user.UserMainScreen
 import com.example.perfumeshop.ui.screens.user.PasswordResetScreen
+import com.example.perfumeshop.ui.screens.user.CartScreen
 import com.example.perfumeshop.ui.screens.admin.AdminDashboardScreen
 
 @Composable
@@ -50,7 +51,16 @@ fun NavGraph() {
                 },
                 onNavigateToLogin = { navController.navigate(Screen.Login.route) },
                 onNavigateToRegister = { navController.navigate(Screen.Register.route) },
-                onNavigateToPasswordReset = { navController.navigate(Screen.PasswordReset.route) }
+                onNavigateToPasswordReset = { navController.navigate(Screen.PasswordReset.route) },
+                onNavigateToCart = { navController.navigate(Screen.Cart.route) }
+            )
+        }
+        composable(Screen.Cart.route) {
+            CartScreen(
+                onBack = { navController.popBackStack() },
+                onCheckout = { selectedItems ->
+                    // Chuyển sang màn hình Thanh toán (Checkout) - sẽ làm sau
+                }
             )
         }
         composable(Screen.PasswordReset.route) {

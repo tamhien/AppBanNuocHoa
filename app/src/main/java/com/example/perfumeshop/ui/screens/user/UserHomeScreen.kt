@@ -116,7 +116,12 @@ fun HomeProductGrid(
 }
 
 @Composable
-fun HomeProductItem(perfume: Perfume, isFavorite: Boolean, onFavoriteToggle: () -> Unit, onClick: () -> Unit) {
+fun HomeProductItem(
+    perfume: Perfume, 
+    isFavorite: Boolean, 
+    onFavoriteToggle: () -> Unit, 
+    onClick: () -> Unit
+) {
     Card(
         shape = RoundedCornerShape(16.dp), 
         colors = CardDefaults.cardColors(containerColor = Color.Transparent), 

@@ -18,8 +18,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import kotlinx.coroutines.launch
 import com.example.perfumeshop.api.RetrofitClient
 import com.example.perfumeshop.model.Perfume
+import com.example.perfumeshop.viewmodel.CartViewModel
 import com.example.perfumeshop.viewmodel.HomeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -29,18 +31,24 @@ fun UserMainScreen(
     onNavigateToLogin: () -> Unit,
     onNavigateToRegister: () -> Unit,
     onNavigateToPasswordReset: () -> Unit,
-    viewModel: HomeViewModel = viewModel()
+    onNavigateToCart: () -> Unit,
+    viewModel: HomeViewModel = viewModel(),
+    cartViewModel: CartViewModel = viewModel()
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
     var isSearchExpanded by remember { mutableStateOf(false) }
     var selectedProduct by remember { mutableStateOf<Perfume?>(null) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
     // Cập nhật trạng thái session mỗi khi quay lại màn hình này
     LaunchedEffect(Unit) {
         viewModel.updateSession()
+        cartViewModel.fetchCart()
     }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             Column(modifier = Modifier
                 .statusBarsPadding()
@@ -71,15 +79,22 @@ fun UserMainScreen(
                             Icon(if (isSearchExpanded) Icons.Default.Close else Icons.Default.Search, null)
                         }
                         Box(modifier = Modifier.padding(end = 8.dp)) {
-                            IconButton(onClick = { /* Chuyển đến Giỏ hàng */ }) {
+                            IconButton(onClick = onNavigateToCart) {
                                 Icon(Icons.Outlined.ShoppingCart, null)
                             }
-                            Surface(
-                                modifier = Modifier.align(Alignment.TopEnd).padding(top = 4.dp),
-                                color = Color.Red,
-                                shape = RoundedCornerShape(10.dp)
-                            ) {
-                                Text("0", color = Color.White, fontSize = 10.sp, modifier = Modifier.padding(horizontal = 5.dp))
+                            if (cartViewModel.cartItems.isNotEmpty()) {
+                                Surface(
+                                    modifier = Modifier.align(Alignment.TopEnd).padding(top = 4.dp),
+                                    color = Color.Red,
+                                    shape = RoundedCornerShape(10.dp)
+                                ) {
+                                    Text(
+                                        text = cartViewModel.cartItems.size.toString(), 
+                                        color = Color.White, 
+                                        fontSize = 10.sp, 
+                                        modifier = Modifier.padding(horizontal = 5.dp)
+                                    )
+                                }
                             }
                         }
                     }
@@ -117,8 +132,14 @@ fun UserMainScreen(
     ) { padding ->
         Box(modifier = Modifier.padding(padding)) {
             when (selectedTab) {
-                0 -> UserHomeScreen(viewModel, onProductClick = { selectedProduct = it })
-                1 -> UserFavoritesScreen(viewModel, onProductClick = { selectedProduct = it })
+                0 -> UserHomeScreen(
+                    viewModel = viewModel, 
+                    onProductClick = { selectedProduct = it }
+                )
+                1 -> UserFavoritesScreen(
+                    viewModel = viewModel, 
+                    onProductClick = { selectedProduct = it }
+                )
                 2 -> UserHistoryScreen(viewModel)
                 3 -> UserAccountScreen(
                     viewModel = viewModel,
@@ -137,8 +158,13 @@ fun UserMainScreen(
             perfume = perfume,
             onDismiss = { selectedProduct = null },
             onAddToCart = { qty ->
-                // Xử lý thêm vào giỏ hàng ở đây
-                selectedProduct = null
+                cartViewModel.addToCart(perfume.id, qty) { success, message ->
+                    selectedProduct = null
+                    // Hiển thị thông báo
+                    scope.launch {
+                        snackbarHostState.showSnackbar(message)
+                    }
+                }
             }
         )
     }

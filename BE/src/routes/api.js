@@ -5,6 +5,7 @@ const perfume = require('../controllers/perfume.controller');
 const order = require('../controllers/order.controller');
 const upload = require('../controllers/upload.controller');
 const favorite = require('../controllers/favorite.controller');
+const cart = require('../controllers/cart.controller');
 
 // Auth
 router.post('/login', auth.login);
@@ -45,5 +46,11 @@ router.post('/upload', upload.uploadImage);
 router.post('/favorites', favorite.addFavorite);
 router.get('/favorites/:userId', favorite.getFavorites);
 router.delete('/favorites/:userId/:perfumeId', favorite.removeFavorite);
+
+// Cart
+router.post('/cart/add', cart.addToCart);
+router.get('/cart/:userId', cart.getCartByUserId);
+router.put('/cart/update', cart.updateCartQuantity);
+router.delete('/cart/:cartId', cart.deleteCartItem);
 
 module.exports = router;

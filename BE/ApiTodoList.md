@@ -44,10 +44,10 @@
 ## 📦 Module 4: Giỏ hàng (Cart System)
 *Xử lý trung gian trước khi thanh toán*
 
-- [ ] `POST /api/cart/add` : Thêm sản phẩm vào giỏ hàng.
-- [ ] `GET /api/cart/:userId` : Xem danh sách sản phẩm trong giỏ.
-- [ ] `PUT /api/cart/update` : Cập nhật số lượng sản phẩm.
-- [ ] `DELETE /api/cart/:cartId` : Xóa sản phẩm khỏi giỏ.
+- [ x] `POST /api/cart/add` : Thêm sản phẩm vào giỏ hàng.
+- [ x] `GET /api/cart/:userId` : Xem danh sách sản phẩm trong giỏ.
+- [ x] `PUT /api/cart/update` : Cập nhật số lượng sản phẩm.
+- [ x] `DELETE /api/cart/:cartId` : Xóa sản phẩm khỏi giỏ.
 
 ---
 
@@ -64,18 +64,18 @@
 ## 📦 Module 6: Quản trị viên (Admin Management)
 *Dành riêng cho người quản lý (Role: admin)*
 
-- [ ] **Quản lý sản phẩm:**
+- [ x] **Quản lý sản phẩm:**
     - [ x] `POST /api/perfumes` : Thêm nước hoa mới.
     - [ x] `PUT /api/perfumes/:id` : Chỉnh sửa thông tin/số lượng.
     - [ x] `DELETE /api/perfumes/:id` : Xóa sản phẩm khỏi cửa hàng.
 - [ ] **Quản lý đơn hàng:**
     - [ ] `GET /api/admin/orders` : Xem toàn bộ đơn hàng của khách hàng.
     - [ ] `PUT /api/admin/orders/status` : Duyệt đơn và cập nhật trạng thái vận chuyển.
-- [ ] **Quản lý khách hàng:**
+- [ x] **Quản lý khách hàng:**
     - [ x] `GET /api/admin/users` : Xem danh sách tất cả tài khoản khách hàng.
     - [ x] `DELETE /api/admin/users/:id` : Khóa hoặc xóa tài khoản khách hàng.
 - [ ] **Thống kê:**
     - [ ] `GET /api/admin/revenue` : Thống kê doanh thu theo thời gian.
 
 ---
-*Ghi chú: [x] = Đã có code xử lý, [ ] = Cần thực hiện tiếp.*
+*Ghi chú: [x] = Đã xong, [ ] = Chưa xong.*

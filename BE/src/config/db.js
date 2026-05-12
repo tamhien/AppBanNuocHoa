@@ -36,7 +36,20 @@ const initDB = async () => {
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `);
-        console.log("Database initialized (Favorites & VerificationCodes tables checked)");
+
+        // Tạo bảng Cart
+        await promisePool.query(`
+            CREATE TABLE IF NOT EXISTS Cart (
+                cart_id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
+                perfume_id INT NOT NULL,
+                quantity INT NOT NULL DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+                FOREIGN KEY (perfume_id) REFERENCES Perfumes(perfume_id) ON DELETE CASCADE
+            )
+        `);
+        console.log("Database initialized (Favorites, VerificationCodes & Cart tables checked)");
     } catch (err) {
         console.error("Lỗi khởi tạo DB:", err.message);
     }

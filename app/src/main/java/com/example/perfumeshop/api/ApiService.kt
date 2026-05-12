@@ -79,4 +79,17 @@ interface ApiService {
 
     @DELETE("favorites/{userId}/{perfumeId}")
     suspend fun removeFavorite(@Path("userId") userId: Int, @Path("perfumeId") perfumeId: Int): Response<BaseResponse>
+
+    // Cart
+    @POST("cart/add")
+    suspend fun addToCart(@Body request: AddToCartRequest): Response<BaseResponse>
+
+    @GET("cart/{userId}")
+    suspend fun getCart(@Path("userId") userId: Int): Response<List<CartItem>>
+
+    @PUT("cart/update")
+    suspend fun updateCart(@Body request: UpdateCartRequest): Response<BaseResponse>
+
+    @DELETE("cart/{cartId}")
+    suspend fun deleteCartItem(@Path("cartId") cartId: Int): Response<BaseResponse>
 }
