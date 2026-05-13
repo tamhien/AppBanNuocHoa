@@ -62,7 +62,7 @@ fun CartScreen(
                     ) {
                         Column {
                             Text("Tổng thanh toán", fontSize = 14.sp, color = Color.Gray)
-                            Text("$${String.format(Locale.US, "%.2f", totalPrice)}", 
+                            Text("${String.format(Locale.US, "%.1f", totalPrice)}$", 
                                 fontSize = 20.sp, 
                                 fontWeight = FontWeight.Bold, 
                                 color = MaterialTheme.colorScheme.primary)
@@ -164,7 +164,7 @@ fun CartItemRow(
         Column(modifier = Modifier.weight(1f)) {
             Text(item.name, fontWeight = FontWeight.Bold, maxLines = 1)
             Text(item.brand, fontSize = 12.sp, color = Color.Gray)
-            Text("$${item.price}", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
+            Text("${String.format(Locale.US, "%.1f", item.price)}$", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
             
             Spacer(modifier = Modifier.height(8.dp))
             

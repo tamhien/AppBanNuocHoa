@@ -54,10 +54,10 @@
 ## 📦 Module 5: Đơn hàng & Lịch sử (Orders & History)
 *Theo dõi trạng thái và lịch sử đặt hàng (Tab Lịch sử ở Footer)*
 
-- [ ] `POST /api/checkout` : Thanh toán (Chốt đơn, trừ kho, xóa giỏ).
-- [ ] `GET /api/orders/user/:userId` : Xem tất cả đơn hàng (Mặc định hiển thị 'All').
-- [ ] `GET /api/orders/user/:userId?status=...` : Lọc đơn hàng theo trạng thái (Chờ duyệt, Đang giao, Thành công, Đã hủy).
-- [ ] `GET /api/orders/detail/:orderId` : Xem chi tiết các món trong đơn hàng cũ.
+- [ x] `POST /api/checkout` : Thanh toán (Chốt đơn, trừ kho, xóa giỏ).
+- [ x] `GET /api/orders/user/:userId` : Xem tất cả đơn hàng (Mặc định hiển thị 'All').
+- [ x] `GET /api/orders/user/:userId?status=...` : Lọc đơn hàng theo trạng thái (Chờ duyệt, Đang giao, Thành công, Đã hủy).
+- [ x] `GET /api/orders/detail/:orderId` : Xem chi tiết các món trong đơn hàng cũ.
 
 ---
 
@@ -68,9 +68,9 @@
     - [ x] `POST /api/perfumes` : Thêm nước hoa mới.
     - [ x] `PUT /api/perfumes/:id` : Chỉnh sửa thông tin/số lượng.
     - [ x] `DELETE /api/perfumes/:id` : Xóa sản phẩm khỏi cửa hàng.
-- [ ] **Quản lý đơn hàng:**
-    - [ ] `GET /api/admin/orders` : Xem toàn bộ đơn hàng của khách hàng.
-    - [ ] `PUT /api/admin/orders/status` : Duyệt đơn và cập nhật trạng thái vận chuyển.
+- [ x] **Quản lý đơn hàng:**
+    - [ x] `GET /api/admin/orders` : Xem toàn bộ đơn hàng của khách hàng.
+    - [ x] `PUT /api/admin/orders/status` : Duyệt đơn và cập nhật trạng thái vận chuyển.
 - [ x] **Quản lý khách hàng:**
     - [ x] `GET /api/admin/users` : Xem danh sách tất cả tài khoản khách hàng.
     - [ x] `DELETE /api/admin/users/:id` : Khóa hoặc xóa tài khoản khách hàng.

@@ -1,19 +1,24 @@
 package com.example.perfumeshop.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.perfumeshop.ui.screens.auth.LoginScreen
 import com.example.perfumeshop.ui.screens.auth.RegisterScreen
-import com.example.perfumeshop.ui.screens.user.UserMainScreen
-import com.example.perfumeshop.ui.screens.user.PasswordResetScreen
-import com.example.perfumeshop.ui.screens.user.CartScreen
+import com.example.perfumeshop.ui.screens.user.*
 import com.example.perfumeshop.ui.screens.admin.AdminDashboardScreen
+import com.example.perfumeshop.viewmodel.CartViewModel
 
 @Composable
 fun NavGraph() {
     val navController = rememberNavController()
+    // Khởi tạo CartViewModel ở đây để có thể chia sẻ dữ liệu giữa Cart và Checkout
+    val cartViewModel: CartViewModel = viewModel()
     
     NavHost(
         navController = navController,
@@ -52,14 +57,44 @@ fun NavGraph() {
                 onNavigateToLogin = { navController.navigate(Screen.Login.route) },
                 onNavigateToRegister = { navController.navigate(Screen.Register.route) },
                 onNavigateToPasswordReset = { navController.navigate(Screen.PasswordReset.route) },
-                onNavigateToCart = { navController.navigate(Screen.Cart.route) }
+                onNavigateToCart = { navController.navigate(Screen.Cart.route) },
+                cartViewModel = cartViewModel
             )
         }
         composable(Screen.Cart.route) {
             CartScreen(
                 onBack = { navController.popBackStack() },
                 onCheckout = { selectedItems ->
-                    // Chuyển sang màn hình Thanh toán (Checkout) - sẽ làm sau
+                    // Dữ liệu đã có trong cartViewModel.getSelectedItems()
+                    navController.navigate(Screen.Checkout.route)
+                },
+                viewModel = cartViewModel
+            )
+        }
+        composable(Screen.Checkout.route) {
+            CheckoutScreen(
+                items = cartViewModel.getSelectedItems(),
+                onBack = { navController.popBackStack() },
+                onOrderSuccess = { orderId ->
+                    navController.navigate(Screen.OrderSuccess.createRoute(orderId)) {
+                        popUpTo(Screen.Cart.route) { inclusive = true }
+                    }
+                    // Sau khi đặt hàng thành công, cần fetch lại cart vì server đã xóa items
+                    cartViewModel.fetchCart()
+                }
+            )
+        }
+        composable(
+            route = Screen.OrderSuccess.route,
+            arguments = listOf(navArgument("orderId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val orderId = backStackEntry.arguments?.getInt("orderId") ?: 0
+            OrderSuccessScreen(
+                orderId = orderId,
+                onContinueShopping = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Home.route) { inclusive = true }
+                    }
                 }
             )
         }

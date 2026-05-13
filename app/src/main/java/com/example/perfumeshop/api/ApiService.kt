@@ -92,4 +92,13 @@ interface ApiService {
 
     @DELETE("cart/{cartId}")
     suspend fun deleteCartItem(@Path("cartId") cartId: Int): Response<BaseResponse>
+
+    @POST("checkout")
+    suspend fun checkout(@Body request: OrderRequest): Response<OrderResponse>
+
+    @GET("orders/user/{userId}")
+    suspend fun getUserOrders(
+        @Path("userId") userId: Int,
+        @Query("status") status: String? = null
+    ): Response<List<Order>>
 }

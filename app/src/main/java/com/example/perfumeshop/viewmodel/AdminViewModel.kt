@@ -8,8 +8,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.perfumeshop.api.RetrofitClient
-import com.example.perfumeshop.model.Perfume
-import com.example.perfumeshop.model.UserResponse
+import com.example.perfumeshop.model.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -28,12 +27,18 @@ class AdminViewModel : ViewModel() {
     private val _users = MutableStateFlow<List<UserResponse>>(emptyList())
     val users: StateFlow<List<UserResponse>> = _users
 
+    private val _orders = MutableStateFlow<List<Order>>(emptyList())
+    val orders: StateFlow<List<Order>> = _orders
+
     var isLoading by mutableStateOf(false)
+        private set
     var errorMessage by mutableStateOf<String?>(null)
+        private set
 
     init { 
         loadPerfumes()
         loadUsers()
+        loadOrders()
     }
 
     fun loadPerfumes() {
@@ -59,6 +64,40 @@ class AdminViewModel : ViewModel() {
                 } else { errorMessage = "Lỗi tải khách hàng: ${response.code()}" }
             } catch (e: Exception) { errorMessage = e.message }
             finally { isLoading = false }
+        }
+    }
+
+    fun loadOrders() {
+        viewModelScope.launch {
+            isLoading = true
+            try {
+                val response = apiService.getAllOrders()
+                if (response.isSuccessful) {
+                    _orders.value = response.body() ?: emptyList()
+                } else {
+                    errorMessage = "Lỗi tải đơn hàng: ${response.code()}"
+                }
+            } catch (e: Exception) {
+                errorMessage = "Lỗi kết nối: ${e.message}"
+            } finally {
+                isLoading = false
+            }
+        }
+    }
+
+    fun updateOrderStatus(orderId: Int, status: String, onResult: (Boolean, String) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val response = apiService.updateOrderStatus(UpdateOrderStatusRequest(orderId, status))
+                if (response.isSuccessful) {
+                    loadOrders()
+                    onResult(true, "Cập nhật trạng thái thành công")
+                } else {
+                    onResult(false, "Lỗi cập nhật")
+                }
+            } catch (e: Exception) {
+                onResult(false, "Lỗi kết nối: ${e.message}")
+            }
         }
     }
 
@@ -131,5 +170,9 @@ class AdminViewModel : ViewModel() {
                 else { errorMessage = "Không thể xóa người dùng" }
             } catch (e: Exception) { errorMessage = e.message }
         }
+    }
+
+    fun clearError() {
+        errorMessage = null
     }
 }

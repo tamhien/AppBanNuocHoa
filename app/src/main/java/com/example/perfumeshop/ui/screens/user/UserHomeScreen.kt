@@ -154,7 +154,7 @@ fun HomeProductItem(
             Spacer(Modifier.height(8.dp))
             Text(text = perfume.name.uppercase(), fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Text(text = perfume.brand, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
-            Text(text = "${perfume.price} $", color = Color.DarkGray, fontSize = 14.sp)
+            Text(text = "${String.format(java.util.Locale.US, "%.1f", perfume.price)}$", color = Color.DarkGray, fontSize = 14.sp)
         }
     }
 }

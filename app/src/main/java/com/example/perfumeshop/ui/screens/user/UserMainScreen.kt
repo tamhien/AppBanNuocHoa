@@ -140,7 +140,7 @@ fun UserMainScreen(
                     viewModel = viewModel, 
                     onProductClick = { selectedProduct = it }
                 )
-                2 -> UserHistoryScreen(viewModel)
+                2 -> UserHistoryScreen()
                 3 -> UserAccountScreen(
                     viewModel = viewModel,
                     onLogout = onLogout,
@@ -204,7 +204,7 @@ fun ProductDetailDialog(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(text = "Thương hiệu: ${perfume.brand}", style = MaterialTheme.typography.bodyMedium)
-                Text(text = "Giá: ${perfume.price} $", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
+                Text(text = "Giá: ${String.format(java.util.Locale.US, "%.1f", perfume.price)}$", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
                 
                 Row(modifier = Modifier.padding(vertical = 8.dp)) {
                     Text(text = "Còn lại: ${perfume.stockQuantity}", style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f))
