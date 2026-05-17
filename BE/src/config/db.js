@@ -5,97 +5,99 @@ const pool = mysql.createPool({
     host: process.env.DB_HOST || '127.0.0.1',
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASS || '',
-    database: process.env.DB_NAME || 'PerfumeShop',
+    database: process.env.DB_NAME || 'perfumeshop',
+    charset: 'utf8mb4',
     waitForConnections: true,
     connectionLimit: 10
 });
 
 const promisePool = pool.promise();
 
-// Tạo bảng Favorites nếu chưa có
+/**
+ * Khởi tạo Database với hỗ trợ Tiếng Việt (utf8mb4)
+ * Đảm bảo tên bảng viết thường để khớp với code xử lý logic
+ */
 const initDB = async () => {
     try {
+        // Đảm bảo Database sử dụng đúng bảng mã
+        await promisePool.query("ALTER DATABASE perfumeshop CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+
+        // Bảng Favorites
         await promisePool.query(`
-            CREATE TABLE IF NOT EXISTS Favorites (
+            CREATE TABLE IF NOT EXISTS favorites (
                 favorite_id INT AUTO_INCREMENT PRIMARY KEY,
                 user_id INT NOT NULL,
                 perfume_id INT NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                UNIQUE KEY user_perfume (user_id, perfume_id),
-                FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
-                FOREIGN KEY (perfume_id) REFERENCES Perfumes(perfume_id) ON DELETE CASCADE
-            )
+                UNIQUE KEY user_perfume (user_id, perfume_id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         `);
-        // Tạo bảng VerificationCodes
+
+        // Bảng VerificationCodes
         await promisePool.query(`
-            CREATE TABLE IF NOT EXISTS VerificationCodes (
+            CREATE TABLE IF NOT EXISTS verificationcodes (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 email VARCHAR(255) NOT NULL,
                 code VARCHAR(6) NOT NULL,
                 expires_at TIMESTAMP NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         `);
 
-        // Tạo bảng Cart
+        // Bảng Cart
         await promisePool.query(`
-            CREATE TABLE IF NOT EXISTS Cart (
+            CREATE TABLE IF NOT EXISTS cart (
                 cart_id INT AUTO_INCREMENT PRIMARY KEY,
                 user_id INT NOT NULL,
                 perfume_id INT NOT NULL,
                 quantity INT NOT NULL DEFAULT 1,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
-                FOREIGN KEY (perfume_id) REFERENCES Perfumes(perfume_id) ON DELETE CASCADE
-            )
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         `);
 
-        // Tạo bảng Orders
+        // Bảng Orders
         await promisePool.query(`
-            CREATE TABLE IF NOT EXISTS Orders (
+            CREATE TABLE IF NOT EXISTS orders (
                 order_id INT AUTO_INCREMENT PRIMARY KEY,
                 user_id INT NOT NULL,
                 total_amount DECIMAL(10,2) NOT NULL,
-                status ENUM('Pending', 'Processing', 'Shipping', 'Completed', 'Cancelled') DEFAULT 'Pending',
+                status ENUM('pending', 'confirmed', 'shipping', 'completed', 'cancelled') DEFAULT 'pending',
                 payment_method VARCHAR(50) NOT NULL,
                 recipient_name VARCHAR(255) NOT NULL,
                 recipient_phone VARCHAR(20) NOT NULL,
                 recipient_address TEXT NOT NULL,
                 note TEXT,
-                order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
-            )
+                order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         `);
 
-        // Sửa lỗi thiếu cột nếu bảng đã tồn tại từ trước
-        try {
-            await promisePool.query("ALTER TABLE Orders ADD COLUMN IF NOT EXISTS payment_method VARCHAR(50) NOT NULL AFTER status");
-            await promisePool.query("ALTER TABLE Orders ADD COLUMN IF NOT EXISTS recipient_name VARCHAR(255) NOT NULL AFTER payment_method");
-            await promisePool.query("ALTER TABLE Orders ADD COLUMN IF NOT EXISTS recipient_phone VARCHAR(20) NOT NULL AFTER recipient_name");
-            await promisePool.query("ALTER TABLE Orders ADD COLUMN IF NOT EXISTS recipient_address TEXT NOT NULL AFTER recipient_phone");
-            await promisePool.query("ALTER TABLE Orders ADD COLUMN IF NOT EXISTS note TEXT AFTER recipient_address");
-        } catch (alterError) {
-            // IF NOT EXISTS có thể không hỗ trợ ở một số phiên bản MariaDB/MySQL cũ,
-            // nhưng lỗi này có thể bỏ qua nếu cột đã có.
-            console.log("Check/Update columns for Orders table");
-        }
-
-        // Tạo bảng OrderDetails
+        // Bảng OrderDetails
         await promisePool.query(`
-            CREATE TABLE IF NOT EXISTS OrderDetails (
-                detail_id INT AUTO_INCREMENT PRIMARY KEY,
+            CREATE TABLE IF NOT EXISTS orderdetails (
+                order_detail_id INT AUTO_INCREMENT PRIMARY KEY,
                 order_id INT NOT NULL,
                 perfume_id INT NOT NULL,
                 quantity INT NOT NULL,
-                unit_price DECIMAL(10,2) NOT NULL,
-                FOREIGN KEY (order_id) REFERENCES Orders(order_id) ON DELETE CASCADE,
-                FOREIGN KEY (perfume_id) REFERENCES Perfumes(perfume_id) ON DELETE CASCADE
-            )
+                unit_price DECIMAL(10,2) NOT NULL
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         `);
 
-        console.log("Database initialized (Tables checked: Favorites, Codes, Cart, Orders, Details)");
+        // Bảng Reviews (đã thêm từ trước, đảm bảo collation)
+        await promisePool.query(`
+            CREATE TABLE IF NOT EXISTS reviews (
+                review_id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
+                perfume_id INT NOT NULL,
+                order_id INT NOT NULL,
+                rating INT NOT NULL,
+                comment TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        `);
+
+        console.log(">>> [DATABASE] Khởi tạo thành công (UTF-8 Ready)");
     } catch (err) {
-        console.error("Lỗi khởi tạo DB:", err.message);
+        console.error(">>> [DATABASE] Lỗi khởi tạo:", err.message);
     }
 };
 

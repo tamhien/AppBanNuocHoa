@@ -1,10 +1,13 @@
 package com.example.perfumeshop.ui.screens.user
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
@@ -17,9 +20,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import android.widget.Toast
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.ImeAction
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.perfumeshop.api.RetrofitClient
@@ -63,6 +71,21 @@ fun UserHistoryScreen(viewModel: HistoryViewModel = viewModel()) {
                         )
                     }
                 }
+                
+                // Hiển thị lỗi nếu có
+                viewModel.errorMessage?.let {
+                    Surface(
+                        color = MaterialTheme.colorScheme.errorContainer,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = it,
+                            color = MaterialTheme.colorScheme.onErrorContainer,
+                            modifier = Modifier.padding(8.dp),
+                            fontSize = 12.sp
+                        )
+                    }
+                }
             }
         }
     ) { padding ->
@@ -99,6 +122,7 @@ fun UserHistoryScreen(viewModel: HistoryViewModel = viewModel()) {
     }
 
     if (showRatingDialog && selectedItemForRating != null) {
+        val context = LocalContext.current
         RatingDialog(
             itemName = selectedItemForRating!!.first.name ?: "",
             onDismiss = { showRatingDialog = false },
@@ -110,7 +134,10 @@ fun UserHistoryScreen(viewModel: HistoryViewModel = viewModel()) {
                     comment = comment
                 ) { success, msg ->
                     showRatingDialog = false
-                    // Có thể hiển thị Toast ở đây nếu cần
+                    Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                    if (success) {
+                        viewModel.fetchOrders() // Tải lại để ẩn nút đánh giá
+                    }
                 }
             }
         )
@@ -175,15 +202,23 @@ fun OrderCard(order: Order, onRateItem: (OrderItem) -> Unit) {
             order.items?.forEach { item ->
                 Column {
                     HistoryItemRow(item)
-                    if (order.status == "Completed") {
+                    // Hiển thị nút đánh giá khi đơn hàng hoàn thành và sản phẩm chưa được đánh giá
+                    if (order.status?.equals("completed", ignoreCase = true) == true && item.isReviewed == 0) {
                         TextButton(
                             onClick = { onRateItem(item) },
                             modifier = Modifier.align(Alignment.End)
                         ) {
-                            Icon(Icons.Default.Star, null, modifier = Modifier.size(16.dp))
+                            Icon(Icons.Default.Star, null, modifier = Modifier.size(16.dp), tint = Color(0xFFFFC107))
                             Spacer(Modifier.width(4.dp))
-                            Text("Đánh giá sản phẩm", fontSize = 12.sp)
+                            Text("Đánh giá sản phẩm", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                         }
+                    } else if (item.isReviewed > 0) {
+                        Text(
+                            text = "Đã đánh giá",
+                            fontSize = 11.sp,
+                            color = Color.Gray,
+                            modifier = Modifier.align(Alignment.End).padding(8.dp)
+                        )
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                 }
@@ -251,43 +286,71 @@ fun RatingDialog(
 ) {
     var rating by remember { mutableIntStateOf(5) }
     var comment by remember { mutableStateOf("") }
+    val scrollState = rememberScrollState()
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Đánh giá sản phẩm") },
+        title = { Text("Đánh giá sản phẩm", fontWeight = FontWeight.Bold) },
         text = {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Text(itemName, fontWeight = FontWeight.Bold)
-                Spacer(Modifier.height(16.dp))
-                
+            // Thêm verticalScroll để không bị nén khi hiện bàn phím
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(scrollState)
+            ) {
+                Text(itemName, fontSize = 14.sp, color = Color.Gray)
+                Spacer(Modifier.height(12.dp))
+
+                Text("Chọn mức độ hài lòng:", fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                Spacer(Modifier.height(8.dp))
+
+                // Layout gọn gàng hơn cho Stars & Radio
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
+                    horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     for (i in 1..5) {
-                        IconButton(onClick = { rating = i }) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.clickable { rating = i }
+                        ) {
                             Icon(
                                 imageVector = if (i <= rating) Icons.Default.Star else Icons.Default.StarBorder,
                                 contentDescription = null,
-                                tint = if (i <= rating) Color(0xFFFFC107) else Color.Gray,
-                                modifier = Modifier.size(32.dp)
+                                tint = if (i <= rating) Color(0xFFFFC107) else Color.LightGray,
+                                modifier = Modifier.size(28.dp)
+                            )
+                            RadioButton(
+                                selected = rating == i,
+                                onClick = { rating = i },
+                                colors = RadioButtonDefaults.colors(selectedColor = Color(0xFFFFC107)),
+                                modifier = Modifier.size(24.dp)
                             )
                         }
                     }
                 }
-                
+
                 Spacer(Modifier.height(16.dp))
                 OutlinedTextField(
                     value = comment,
                     onValueChange = { comment = it },
-                    label = { Text("Nhận xét của bạn") },
+                    label = { Text("Viết nhận xét của bạn...") },
                     modifier = Modifier.fillMaxWidth(),
-                    minLines = 3
+                    minLines = 3,
+                    maxLines = 5,
+                    shape = RoundedCornerShape(8.dp),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Text,
+                        imeAction = ImeAction.Done
+                    )
                 )
             }
         },
         confirmButton = {
-            Button(onClick = { onConfirm(rating, comment) }) {
+            Button(
+                onClick = { onConfirm(rating, comment) },
+                shape = RoundedCornerShape(8.dp)
+            ) {
                 Text("Gửi đánh giá")
             }
         },
@@ -301,12 +364,12 @@ fun RatingDialog(
 
 @Composable
 fun StatusChip(status: String) {
-    val (color, text) = when (status) {
-        "Pending" -> Color(0xFFFFA000) to "Chờ xác nhận"
-        "Processing" -> Color(0xFF1976D2) to "Đang xử lý"
-        "Shipping" -> Color(0xFF0288D1) to "Đang giao"
-        "Completed" -> Color(0xFF388E3C) to "Hoàn thành"
-        "Cancelled" -> Color(0xFFD32F2F) to "Đã hủy"
+    val (color, text) = when (status.lowercase()) {
+        "pending" -> Color(0xFFFFA000) to "Chờ xác nhận"
+        "confirmed", "processing" -> Color(0xFF1976D2) to "Đang xử lý"
+        "shipping" -> Color(0xFF0288D1) to "Đang giao"
+        "completed" -> Color(0xFF388E3C) to "Hoàn thành"
+        "cancelled" -> Color(0xFFD32F2F) to "Đã hủy"
         else -> Color.Gray to status
     }
 

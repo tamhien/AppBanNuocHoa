@@ -3,9 +3,9 @@ const db = require('../config/db');
 exports.addReview = async (req, res) => {
     const { user_id, perfume_id, order_id, rating, comment } = req.body;
     try {
-        // Kiểm tra xem đã đánh giá chưa
+        // Sử dụng tên bảng 'reviews' viết thường
         const [existing] = await db.query(
-            "SELECT * FROM Reviews WHERE order_id = ? AND perfume_id = ?",
+            "SELECT * FROM reviews WHERE order_id = ? AND perfume_id = ?",
             [order_id, perfume_id]
         );
 
@@ -14,11 +14,12 @@ exports.addReview = async (req, res) => {
         }
 
         await db.query(
-            "INSERT INTO Reviews (user_id, perfume_id, order_id, rating, comment) VALUES (?, ?, ?, ?, ?)",
+            "INSERT INTO reviews (user_id, perfume_id, order_id, rating, comment) VALUES (?, ?, ?, ?, ?)",
             [user_id, perfume_id, order_id, rating, comment]
         );
         res.json({ success: true, message: "Đánh giá thành công!" });
     } catch (err) {
+        console.error("Error in addReview:", err);
         res.status(500).json({ success: false, error: err.message });
     }
 };
@@ -28,8 +29,8 @@ exports.getPerfumeReviews = async (req, res) => {
     try {
         const [rows] = await db.query(`
             SELECT r.*, u.full_name
-            FROM Reviews r
-            JOIN Users u ON r.user_id = u.user_id
+            FROM reviews r
+            JOIN users u ON r.user_id = u.user_id
             WHERE r.perfume_id = ?
             ORDER BY r.created_at DESC
         `, [perfumeId]);

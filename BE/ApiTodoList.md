@@ -68,6 +68,7 @@
     - [ x] `POST /api/perfumes` : Thêm nước hoa mới.
     - [ x] `PUT /api/perfumes/:id` : Chỉnh sửa thông tin/số lượng.
     - [ x] `DELETE /api/perfumes/:id` : Xóa sản phẩm khỏi cửa hàng.
+    - [ x] **UI Logic**: Cảnh báo và bộ lọc sản phẩm sắp hết hàng (số lượng < 10).
 - [ x] **Quản lý đơn hàng:**
     - [ x] `GET /api/admin/orders` : Xem toàn bộ đơn hàng của khách hàng.
     - [ x] `PUT /api/admin/orders/status` : Duyệt đơn và cập nhật trạng thái vận chuyển.
@@ -76,6 +77,15 @@
     - [ x] `DELETE /api/admin/users/:id` : Khóa hoặc xóa tài khoản khách hàng.
 - [ x] **Thống kê:**
     - [ x] `GET /api/admin/revenue` : Thống kê doanh thu theo thời gian.
+
+---
+
+##  Module 7: Hệ thống Đánh giá (Reviews)
+*Đánh giá sản phẩm sau khi mua hàng (Hiển thị trong Chi tiết sản phẩm)*
+
+- [ x] `POST /api/reviews` : Gửi đánh giá (sao và bình luận) cho sản phẩm thuộc đơn hàng đã hoàn thành.
+- [ x] `GET /api/reviews/:perfumeId` : Lấy danh sách đánh giá của một sản phẩm.
+- [ x] **UI Logic**: Nút "Đánh giá sản phẩm" chỉ hiển thị ở đơn hàng có trạng thái `completed` và sản phẩm đó chưa được đánh giá.
 
 ---
 *Ghi chú: [x] = Đã xong, [ ] = Chưa xong.*

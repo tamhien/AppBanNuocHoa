@@ -35,14 +35,15 @@ data class Order(
 )
 
 data class OrderItem(
-    @SerializedName("detail_id") val detailId: Int,
+    @SerializedName("order_detail_id") val detailId: Int,
     @SerializedName("order_id") val orderId: Int,
     @SerializedName("perfume_id") val perfumeId: Int,
     @SerializedName("quantity") val quantity: Int,
     @SerializedName("unit_price") val unitPrice: Double,
     @SerializedName("name") val name: String?,
     @SerializedName("image_url") val imageUrl: String?,
-    @SerializedName("brand") val brand: String?
+    @SerializedName("brand") val brand: String?,
+    @SerializedName("is_reviewed") val isReviewed: Int = 0
 )
 
 data class UpdateOrderStatusRequest(
