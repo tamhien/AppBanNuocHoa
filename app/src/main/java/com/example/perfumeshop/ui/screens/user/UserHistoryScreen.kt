@@ -40,16 +40,12 @@ fun UserHistoryScreen(viewModel: HistoryViewModel = viewModel()) {
 
     Scaffold(
         topBar = {
-            Column(modifier = Modifier.background(Color.White)) {
-                TopAppBar(
-                    title = { Text("Lịch sử đơn hàng", fontWeight = FontWeight.Bold) },
-                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
-                )
+            Column(modifier = Modifier.background(Color.White).statusBarsPadding()) {
                 // Filter Bar
                 LazyRow(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 8.dp),
+                        .padding(vertical = 12.dp),
                     contentPadding = PaddingValues(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {

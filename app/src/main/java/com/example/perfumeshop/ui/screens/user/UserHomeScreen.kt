@@ -122,6 +122,8 @@ fun HomeProductItem(
     onFavoriteToggle: () -> Unit, 
     onClick: () -> Unit
 ) {
+    val isOutOfStock = (perfume.stockQuantity ?: 0) <= 0
+
     Card(
         shape = RoundedCornerShape(16.dp), 
         colors = CardDefaults.cardColors(containerColor = Color.Transparent), 
@@ -138,6 +140,28 @@ fun HomeProductItem(
                     contentScale = ContentScale.Crop
                 )
                 
+                if (isOutOfStock) {
+                    Surface(
+                        color = Color.Black.copy(alpha = 0.5f),
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Surface(
+                                color = Color.Red,
+                                shape = RoundedCornerShape(4.dp)
+                            ) {
+                                Text(
+                                    text = "HẾT HÀNG",
+                                    color = Color.White,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+
                 Surface(color = Color.Black.copy(alpha = 0.6f), shape = RoundedCornerShape(4.dp), modifier = Modifier.padding(8.dp)) {
                     val genderLabel = when(perfume.gender) {
                         "Men" -> "Nam"
