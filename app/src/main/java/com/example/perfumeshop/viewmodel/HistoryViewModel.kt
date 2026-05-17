@@ -60,4 +60,22 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
             }
         }
     }
+
+    fun postReview(perfumeId: Int, orderId: Int, rating: Int, comment: String, onResult: (Boolean, String) -> Unit) {
+        val userId = sessionManager.getUserId()
+        if (userId == -1) return
+
+        viewModelScope.launch {
+            try {
+                val response = apiService.addReview(com.example.perfumeshop.model.ReviewRequest(userId, perfumeId, orderId, rating, comment))
+                if (response.isSuccessful) {
+                    onResult(true, "Đánh giá thành công!")
+                } else {
+                    onResult(false, "Lỗi: ${response.message()}")
+                }
+            } catch (e: Exception) {
+                onResult(false, "Lỗi kết nối: ${e.message}")
+            }
+        }
+    }
 }

@@ -63,7 +63,7 @@ interface ApiService {
 
     // Thống kê
     @GET("admin/revenue")
-    suspend fun getRevenue(): Response<RevenueResponse>
+    suspend fun getRevenue(@Query("month") month: String? = null): Response<RevenueResponse>
 
     // Upload ảnh
     @Multipart
@@ -101,4 +101,11 @@ interface ApiService {
         @Path("userId") userId: Int,
         @Query("status") status: String? = null
     ): Response<List<Order>>
+
+    // Reviews
+    @POST("reviews")
+    suspend fun addReview(@Body request: ReviewRequest): Response<BaseResponse>
+
+    @GET("reviews/{perfumeId}")
+    suspend fun getPerfumeReviews(@Path("perfumeId") perfumeId: Int): Response<List<Review>>
 }

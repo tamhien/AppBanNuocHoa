@@ -109,7 +109,7 @@ fun ProductAdminItem(perfume: Perfume, onEdit: () -> Unit, onDelete: () -> Unit)
             )
             Spacer(Modifier.width(16.dp))
             Column(Modifier.weight(1f)) {
-                Text(perfume.name, fontWeight = FontWeight.Bold)
+                Text(perfume.name ?: "", fontWeight = FontWeight.Bold)
                 Text("${perfume.price} $", color = MaterialTheme.colorScheme.primary)
             }
             IconButton(onClick = onEdit) { Icon(Icons.Default.Edit, "Sửa", tint = Color.Blue) }
@@ -164,7 +164,7 @@ fun ProductDialog(perfume: Perfume?, viewModel: AdminViewModel, onDismiss: () ->
                         }
                     }
                     Spacer(Modifier.height(16.dp))
-                    OutlinedTextField(name, { name = it }, label = { Text("Tên sản phẩm (có dấu)") }, modifier = Modifier.fillMaxWidth(), keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences))
+                    OutlinedTextField(name, { name = it }, label = { Text("Tên sản phẩm") }, modifier = Modifier.fillMaxWidth(), keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences))
                     Spacer(Modifier.height(8.dp))
                     OutlinedTextField(brand, { brand = it }, label = { Text("Thương hiệu") }, modifier = Modifier.fillMaxWidth())
                     Spacer(Modifier.height(8.dp))

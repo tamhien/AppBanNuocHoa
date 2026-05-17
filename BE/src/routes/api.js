@@ -6,6 +6,7 @@ const order = require('../controllers/order.controller');
 const upload = require('../controllers/upload.controller');
 const favorite = require('../controllers/favorite.controller');
 const cart = require('../controllers/cart.controller');
+const review = require('../controllers/review.controller');
 
 // Auth
 router.post('/login', auth.login);
@@ -52,5 +53,9 @@ router.post('/cart/add', cart.addToCart);
 router.get('/cart/:userId', cart.getCartByUserId);
 router.put('/cart/update', cart.updateCartQuantity);
 router.delete('/cart/:cartId', cart.deleteCartItem);
+
+// Reviews
+router.post('/reviews', review.addReview);
+router.get('/reviews/:perfumeId', review.getPerfumeReviews);
 
 module.exports = router;

@@ -21,6 +21,7 @@ import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
 import com.example.perfumeshop.api.RetrofitClient
 import com.example.perfumeshop.model.Perfume
+import com.example.perfumeshop.model.Review
 import com.example.perfumeshop.viewmodel.CartViewModel
 import com.example.perfumeshop.viewmodel.HomeViewModel
 
@@ -177,12 +178,32 @@ fun ProductDetailDialog(
     onAddToCart: (Int) -> Unit
 ) {
     var quantity by remember { mutableIntStateOf(1) }
+    val isOutOfStock = (perfume.stockQuantity ?: 0) <= 0
+    
+    var reviews by remember { mutableStateOf<List<Review>>(emptyList()) }
+    var isLoadingReviews by remember { mutableStateOf(true) }
+
+    LaunchedEffect(perfume.id) {
+        try {
+            val response = RetrofitClient.instance.getPerfumeReviews(perfume.id)
+            if (response.isSuccessful) {
+                reviews = response.body() ?: emptyList()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            isLoadingReviews = false
+        }
+    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
-            Button(onClick = { onAddToCart(quantity) }) {
-                Text("Thêm vào giỏ")
+            Button(
+                onClick = { onAddToCart(quantity) },
+                enabled = !isOutOfStock
+            ) {
+                Text(if (isOutOfStock) "Hết hàng" else "Thêm vào giỏ")
             }
         },
         dismissButton = {
@@ -190,42 +211,85 @@ fun ProductDetailDialog(
                 Text("Hủy")
             }
         },
-        title = { Text(perfume.name, fontWeight = FontWeight.Bold) },
+        title = { Text(perfume.name ?: "Unknown", fontWeight = FontWeight.Bold) },
         text = {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                AsyncImage(
-                    model = RetrofitClient.getFullImageUrl(perfume.imageUrl),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
-                        .clip(RoundedCornerShape(8.dp)),
-                    contentScale = ContentScale.Crop
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(text = "Thương hiệu: ${perfume.brand}", style = MaterialTheme.typography.bodyMedium)
-                Text(text = "Giá: ${String.format(java.util.Locale.US, "%.1f", perfume.price)}$", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
-                
-                Row(modifier = Modifier.padding(vertical = 8.dp)) {
-                    Text(text = "Còn lại: ${perfume.stockQuantity}", style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f))
-                    Text(text = "Đã bán: ${perfume.soldCount}", style = MaterialTheme.typography.bodySmall)
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(text = perfume.description, style = MaterialTheme.typography.bodySmall)
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    IconButton(onClick = { if (quantity > 1) quantity-- }) {
-                        Icon(Icons.Default.Remove, null)
+            androidx.compose.foundation.lazy.LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                item {
+                    AsyncImage(
+                        model = RetrofitClient.getFullImageUrl(perfume.imageUrl),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
+                            .clip(RoundedCornerShape(8.dp)),
+                        contentScale = ContentScale.Crop
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(text = "Thương hiệu: ${perfume.brand ?: ""}", style = MaterialTheme.typography.bodyMedium)
+                    Text(text = "Giá: ${String.format(java.util.Locale.US, "%.1f", perfume.price ?: 0.0)}$", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
+                    
+                    Row(modifier = Modifier.padding(vertical = 8.dp)) {
+                        Text(
+                            text = if (isOutOfStock) "Hết hàng" else "Còn lại: ${perfume.stockQuantity}", 
+                            style = MaterialTheme.typography.bodySmall, 
+                            color = if (isOutOfStock) Color.Red else Color.Unspecified,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Text(text = "Đã bán: ${perfume.soldCount ?: 0}", style = MaterialTheme.typography.bodySmall)
                     }
-                    Text(text = quantity.toString(), modifier = Modifier.padding(horizontal = 16.dp), style = MaterialTheme.typography.titleMedium)
-                    IconButton(onClick = { quantity++ }) {
-                        Icon(Icons.Default.Add, null)
+
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(text = perfume.description ?: "", style = MaterialTheme.typography.bodySmall)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    if (!isOutOfStock) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            IconButton(onClick = { if (quantity > 1) quantity-- }) {
+                                Icon(Icons.Default.Remove, null)
+                            }
+                            Text(text = quantity.toString(), modifier = Modifier.padding(horizontal = 16.dp), style = MaterialTheme.typography.titleMedium)
+                            IconButton(onClick = { if (quantity < (perfume.stockQuantity ?: 0)) quantity++ }) {
+                                Icon(Icons.Default.Add, null)
+                            }
+                        }
+                    }
+                    
+                    Spacer(modifier = Modifier.height(24.dp))
+                    HorizontalDivider()
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("Đánh giá từ khách hàng", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+                
+                if (isLoadingReviews) {
+                    item { CircularProgressIndicator(modifier = Modifier.padding(16.dp)) }
+                } else if (reviews.isEmpty()) {
+                    item { Text("Chưa có đánh giá nào cho sản phẩm này", style = MaterialTheme.typography.bodySmall, color = Color.Gray) }
+                } else {
+                    items(reviews.size) { index ->
+                        val review = reviews[index]
+                        Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(review.fullName ?: "Khách hàng", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                                Spacer(Modifier.width(8.dp))
+                                Row {
+                                    for (i in 1..5) {
+                                        Icon(
+                                            Icons.Default.Star, null, 
+                                            modifier = Modifier.size(14.dp),
+                                            tint = if (i <= review.rating) Color(0xFFFFC107) else Color.LightGray
+                                        )
+                                    }
+                                }
+                            }
+                            Text(review.comment, style = MaterialTheme.typography.bodySmall)
+                            Text(review.createdAt?.take(10) ?: "", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+                            HorizontalDivider(modifier = Modifier.padding(top = 8.dp), thickness = 0.5.dp)
+                        }
                     }
                 }
             }

@@ -47,7 +47,7 @@ fun AdminCustomersScreen(viewModel: AdminViewModel) {
         AlertDialog(
             onDismissRequest = { userToDelete = null },
             title = { Text("Xác nhận xóa") },
-            text = { Text("Bạn có chắc chắn muốn xóa tài khoản của '${user.fullName}'? Hành động này không thể khôi phục.") },
+            text = { Text("Bạn có chắc chắn muốn xóa tài khoản của '${user.fullName ?: "người dùng này"}'? Hành động này không thể khôi phục.") },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -75,10 +75,10 @@ fun CustomerItem(user: UserResponse, onLock: () -> Unit, onDelete: () -> Unit) {
             Icon(Icons.Default.Person, null, modifier = Modifier.size(40.dp), tint = Color.Gray)
             Spacer(Modifier.width(16.dp))
             Column(Modifier.weight(1f)) {
-                Text(user.fullName, fontWeight = FontWeight.Bold)
-                Text(user.username, style = MaterialTheme.typography.bodySmall)
-                Text(user.email, style = MaterialTheme.typography.bodySmall)
-                Text(user.phone, style = MaterialTheme.typography.bodySmall)
+                Text(user.fullName ?: "Chưa cập nhật", fontWeight = FontWeight.Bold)
+                Text(user.username ?: "", style = MaterialTheme.typography.bodySmall)
+                Text(user.email ?: "", style = MaterialTheme.typography.bodySmall)
+                Text(user.phone ?: "", style = MaterialTheme.typography.bodySmall)
             }
             Row {
                 IconButton(onClick = onLock) {

@@ -1,17 +1,17 @@
-# 📋 PROGRESS TODOLIST - PERFUME SHOP PROJECT
+#  PROGRESS TODOLIST - PERFUME SHOP PROJECT
 
 ---
 
-## 📦 Module 1: Xác thực & Tài khoản (Authentication & Account)
+##  Module 1: Xác thực & Tài khoản (Authentication & Account)
 *Quản lý người dùng, phân quyền và hiển thị theo trạng thái đăng nhập*
 
-### 🔑 Authentication (Tại màn hình Login/Register)
+###  Authentication (Tại màn hình Login/Register)
 - [ x] `POST /api/register` : Đăng ký tài khoản (Role mặc định là 'user', gửi Password đã Hash).
 - [ x] `POST /api/login` : Đăng nhập, trả về Role ('admin'/'user').
 - [ x] `POST /api/forgot-password` : **Quên mật khẩu** (sử dụng thư viện Nodemailer/kết nối từ Server Node.js của bạn tới máy chủ của Google (Gmail) thông qua giao thức SMTP (Simple Mail Transfer Protocol).
 - [ x] **UI Logic**: Hiển thị nút **Đăng nhập / Đăng ký** khi người dùng chưa đăng nhập.
 
-### 👤 Account (Tại màn hình Trang chủ -> Tab Tài khoản)
+###  Account (Tại màn hình Trang chủ -> Tab Tài khoản)
 - [ x] `GET /api/profile/:id` : Lấy thông tin cá nhân (Tên, SĐT, Email, Địa chỉ) từ DB.
 - [ x] `PUT /api/profile/:id` : Cập nhật thông tin cá nhân cơ bản.
 - [ x] `PUT /api/change-password/:id` : **Đổi mật khẩu** (Yêu cầu: MK hiện tại, MK mới, Nhập lại MK mới).
@@ -20,7 +20,7 @@
 
 ---
 
-## 📦 Module 2: Trang chủ & Sản phẩm (Home & Perfumes)
+##  Module 2: Trang chủ & Sản phẩm (Home & Perfumes)
 *Hiển thị sản phẩm và các bộ lọc cho User*
 
 - [ x] `GET /api/perfumes` : Mặc định hiển thị tất cả sản phẩm.
@@ -32,7 +32,7 @@
 
 ---
 
-## 📦 Module 3: Hệ thống Yêu thích (Favorites)
+##  Module 3: Hệ thống Yêu thích (Favorites)
 *Lưu trữ các sản phẩm quan tâm (Tab Yêu thích ở Footer)*
 
 - [ x] `POST /api/favorites` : Thêm sản phẩm vào danh sách yêu thích.
@@ -41,7 +41,7 @@
 
 ---
 
-## 📦 Module 4: Giỏ hàng (Cart System)
+##  Module 4: Giỏ hàng (Cart System)
 *Xử lý trung gian trước khi thanh toán*
 
 - [ x] `POST /api/cart/add` : Thêm sản phẩm vào giỏ hàng.
@@ -51,7 +51,7 @@
 
 ---
 
-## 📦 Module 5: Đơn hàng & Lịch sử (Orders & History)
+##  Module 5: Đơn hàng & Lịch sử (Orders & History)
 *Theo dõi trạng thái và lịch sử đặt hàng (Tab Lịch sử ở Footer)*
 
 - [ x] `POST /api/checkout` : Thanh toán (Chốt đơn, trừ kho, xóa giỏ).
@@ -61,7 +61,7 @@
 
 ---
 
-## 📦 Module 6: Quản trị viên (Admin Management)
+##  Module 6: Quản trị viên (Admin Management)
 *Dành riêng cho người quản lý (Role: admin)*
 
 - [ x] **Quản lý sản phẩm:**
@@ -74,8 +74,8 @@
 - [ x] **Quản lý khách hàng:**
     - [ x] `GET /api/admin/users` : Xem danh sách tất cả tài khoản khách hàng.
     - [ x] `DELETE /api/admin/users/:id` : Khóa hoặc xóa tài khoản khách hàng.
-- [ ] **Thống kê:**
-    - [ ] `GET /api/admin/revenue` : Thống kê doanh thu theo thời gian.
+- [ x] **Thống kê:**
+    - [ x] `GET /api/admin/revenue` : Thống kê doanh thu theo thời gian.
 
 ---
 *Ghi chú: [x] = Đã xong, [ ] = Chưa xong.*

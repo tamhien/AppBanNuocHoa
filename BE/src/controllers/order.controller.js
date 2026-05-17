@@ -34,6 +34,12 @@ exports.checkout = async (req, res) => {
         }
 
         for (let item of itemsToOrder) {
+            // Kiểm tra tồn kho trước khi thanh toán
+            const [stockRows] = await connection.query("SELECT stock_quantity, name FROM Perfumes WHERE perfume_id = ?", [item.perfume_id]);
+            if (stockRows.length === 0 || stockRows[0].stock_quantity < item.quantity) {
+                throw new Error(`Sản phẩm ${stockRows[0]?.name || ''} không đủ số lượng trong kho`);
+            }
+
             // Lưu vào OrderDetails
             await connection.query(
                 "INSERT INTO OrderDetails (order_id, perfume_id, quantity, unit_price) VALUES (?, ?, ?, ?)",
@@ -120,9 +126,72 @@ exports.updateOrderStatus = async (req, res) => {
 
 exports.getRevenue = async (req, res) => {
     try {
-        const [revenue] = await db.query("SELECT SUM(total_amount) as total_revenue, COUNT(*) as order_count FROM Orders WHERE status = 'Completed'");
-        res.json({ success: true, total_revenue: revenue[0].total_revenue || 0, order_count: revenue[0].order_count || 0 });
+        const { month } = req.query; // format: YYYY-MM
+
+        // 1. Thống kê theo từng tháng: Lấy doanh thu bằng cách sum(quantity * unit_price) từ OrderDetails
+        const [monthlyStats] = await db.query(`
+            SELECT
+                DATE_FORMAT(o.order_date, '%Y-%m') as month,
+                SUM(od.quantity * od.unit_price) as monthly_revenue,
+                COUNT(DISTINCT o.order_id) as order_count
+            FROM Orders o
+            JOIN OrderDetails od ON o.order_id = od.order_id
+            WHERE LOWER(o.status) LIKE '%completed%'
+            GROUP BY month
+            ORDER BY month DESC
+        `);
+
+        // 2. Lấy chi tiết đơn hàng
+        let ordersDetail = [];
+        if (month) {
+            const [rows] = await db.query(`
+                SELECT o.*, u.full_name
+                FROM Orders o
+                JOIN Users u ON o.user_id = u.user_id
+                WHERE DATE_FORMAT(o.order_date, '%Y-%m') = ?
+                AND LOWER(o.status) LIKE '%completed%'
+                ORDER BY o.order_date DESC
+            `, [month]);
+
+            for (let order of rows) {
+                const [details] = await db.query(`
+                    SELECT od.*, p.name, p.image_url, p.brand
+                    FROM OrderDetails od
+                    JOIN Perfumes p ON od.perfume_id = p.perfume_id
+                    WHERE od.order_id = ?
+                `, [order.order_id]);
+
+                // Đảm bảo items luôn là mảng, kể cả khi không có dữ liệu
+                order.items = details || [];
+
+                // Tính toán lại tổng tiền của từng đơn hàng từ chi tiết để đảm bảo chính xác
+                order.total_amount = (details || []).reduce((sum, item) => sum + (parseFloat(item.quantity || 0) * parseFloat(item.unit_price || 0)), 0);
+            }
+            ordersDetail = rows;
+        }
+
+        // 3. Tính toán Tổng doanh thu và Tổng số đơn hiển thị lên UI
+        let displayRevenue = 0;
+        let displayOrderCount = 0;
+
+        if (month) {
+            // Nếu chọn tháng: Tính tổng từ các đơn hàng đã lấy của tháng đó
+            displayOrderCount = ordersDetail.length;
+            displayRevenue = ordersDetail.reduce((sum, order) => sum + parseFloat(order.total_amount || 0), 0);
+        } else {
+            // Nếu không chọn tháng: Tính tổng từ tất cả các tháng
+            displayOrderCount = monthlyStats.reduce((sum, stat) => sum + parseInt(stat.order_count || 0), 0);
+            displayRevenue = monthlyStats.reduce((sum, stat) => sum + parseFloat(stat.monthly_revenue || 0), 0);
+        }
+
+        res.json({
+            success: true,
+            total_revenue: displayRevenue,
+            order_count: displayOrderCount,
+            monthly_stats: monthlyStats,
+            orders_detail: ordersDetail
+        });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ success: false, error: err.message });
     }
 };

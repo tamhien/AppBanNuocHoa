@@ -8,9 +8,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,6 +31,9 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserHistoryScreen(viewModel: HistoryViewModel = viewModel()) {
+    var showRatingDialog by remember { mutableStateOf(false) }
+    var selectedItemForRating by remember { mutableStateOf<Pair<OrderItem, Int>?>(null) } // Pair of Item and OrderId
+
     LaunchedEffect(Unit) {
         viewModel.fetchOrders()
     }
@@ -85,11 +89,35 @@ fun UserHistoryScreen(viewModel: HistoryViewModel = viewModel()) {
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     items(viewModel.orders) { order ->
-                        OrderCard(order)
+                        OrderCard(
+                            order = order,
+                            onRateItem = { item ->
+                                selectedItemForRating = item to order.orderId
+                                showRatingDialog = true
+                            }
+                        )
                     }
                 }
             }
         }
+    }
+
+    if (showRatingDialog && selectedItemForRating != null) {
+        RatingDialog(
+            itemName = selectedItemForRating!!.first.name ?: "",
+            onDismiss = { showRatingDialog = false },
+            onConfirm = { rating, comment ->
+                viewModel.postReview(
+                    perfumeId = selectedItemForRating!!.first.perfumeId,
+                    orderId = selectedItemForRating!!.second,
+                    rating = rating,
+                    comment = comment
+                ) { success, msg ->
+                    showRatingDialog = false
+                    // Có thể hiển thị Toast ở đây nếu cần
+                }
+            }
+        )
     }
 }
 
@@ -110,7 +138,7 @@ fun EmptyHistory() {
 }
 
 @Composable
-fun OrderCard(order: Order) {
+fun OrderCard(order: Order, onRateItem: (OrderItem) -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
@@ -137,20 +165,32 @@ fun OrderCard(order: Order) {
                         color = MaterialTheme.colorScheme.primary
                     )
                     Text(
-                        text = order.orderDate.replace("T", " ").take(16), 
+                        text = order.orderDate?.replace("T", " ")?.take(16) ?: "N/A", 
                         fontSize = 11.sp, 
                         color = Color.Gray
                     )
                 }
-                StatusChip(order.status)
+                StatusChip(order.status ?: "N/A")
             }
             
             HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), thickness = 0.5.dp, color = Color(0xFFEEEEEE))
 
             // Items list
-            order.items.forEach { item ->
-                HistoryItemRow(item)
-                Spacer(modifier = Modifier.height(12.dp))
+            order.items?.forEach { item ->
+                Column {
+                    HistoryItemRow(item)
+                    if (order.status == "Completed") {
+                        TextButton(
+                            onClick = { onRateItem(item) },
+                            modifier = Modifier.align(Alignment.End)
+                        ) {
+                            Icon(Icons.Default.Star, null, modifier = Modifier.size(16.dp))
+                            Spacer(Modifier.width(4.dp))
+                            Text("Đánh giá sản phẩm", fontSize = 12.sp)
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
             }
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), thickness = 0.5.dp, color = Color(0xFFEEEEEE))
@@ -195,8 +235,8 @@ fun HistoryItemRow(item: OrderItem) {
         )
         Spacer(modifier = Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
-            Text(item.name, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, maxLines = 1)
-            Text(item.brand, fontSize = 12.sp, color = Color.Gray)
+            Text(item.name ?: "", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, maxLines = 1)
+            Text(item.brand ?: "", fontSize = 12.sp, color = Color.Gray)
             Text("x${item.quantity}", fontSize = 13.sp, fontWeight = FontWeight.Medium)
         }
         Text(
@@ -205,6 +245,62 @@ fun HistoryItemRow(item: OrderItem) {
             fontWeight = FontWeight.SemiBold
         )
     }
+}
+
+@Composable
+fun RatingDialog(
+    itemName: String,
+    onDismiss: () -> Unit,
+    onConfirm: (Int, String) -> Unit
+) {
+    var rating by remember { mutableIntStateOf(5) }
+    var comment by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Đánh giá sản phẩm") },
+        text = {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Text(itemName, fontWeight = FontWeight.Bold)
+                Spacer(Modifier.height(16.dp))
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    for (i in 1..5) {
+                        IconButton(onClick = { rating = i }) {
+                            Icon(
+                                imageVector = if (i <= rating) Icons.Default.Star else Icons.Default.StarBorder,
+                                contentDescription = null,
+                                tint = if (i <= rating) Color(0xFFFFC107) else Color.Gray,
+                                modifier = Modifier.size(32.dp)
+                            )
+                        }
+                    }
+                }
+                
+                Spacer(Modifier.height(16.dp))
+                OutlinedTextField(
+                    value = comment,
+                    onValueChange = { comment = it },
+                    label = { Text("Nhận xét của bạn") },
+                    modifier = Modifier.fillMaxWidth(),
+                    minLines = 3
+                )
+            }
+        },
+        confirmButton = {
+            Button(onClick = { onConfirm(rating, comment) }) {
+                Text("Gửi đánh giá")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Hủy")
+            }
+        }
+    )
 }
 
 @Composable

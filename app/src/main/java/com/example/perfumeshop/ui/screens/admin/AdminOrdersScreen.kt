@@ -56,7 +56,7 @@ fun AdminOrdersScreen(viewModel: AdminViewModel) {
     val filteredOrders = remember(orders, searchQuery, selectedFilterStatus) {
         orders.filter { order ->
             val matchesStatus = if (selectedFilterStatus == "All") true 
-                               else order.status.equals(selectedFilterStatus, ignoreCase = true)
+                               else order.status?.equals(selectedFilterStatus, ignoreCase = true) == true
             
             val query = searchQuery.trim().lowercase()
             val matchesSearch = if (query.isEmpty()) true
@@ -149,7 +149,7 @@ fun AdminOrdersScreen(viewModel: AdminViewModel) {
                         AdminOrderCard(
                             order = order,
                             onStatusChange = { newStatus ->
-                                viewModel.updateOrderStatus(order.orderId, newStatus) { success, msg ->
+                                viewModel.updateOrderStatus(order.orderId, newStatus) { _, msg ->
                                     Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
                                 }
                             }
@@ -185,18 +185,18 @@ fun AdminOrderCard(order: Order, onStatusChange: (String) -> Unit) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Top) {
                 Column {
                     Text("Mã đơn: #${order.orderId}", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = MaterialTheme.colorScheme.primary)
-                    Text(order.orderDate.replace("T", " ").take(16), fontSize = 12.sp, color = Color.Gray)
+                    Text((order.orderDate ?: "").replace("T", " ").take(16), fontSize = 12.sp, color = Color.Gray)
                 }
                 
                 Box {
-                    StatusChipAdmin(order.status, onClick = { showStatusMenu = true })
+                    StatusChipAdmin(order.status ?: "Pending", onClick = { showStatusMenu = true })
                     DropdownMenu(expanded = showStatusMenu, onDismissRequest = { showStatusMenu = false }) {
                         statusOptions.forEach { (value, label) ->
                             DropdownMenuItem(
                                 text = { Text(label) },
                                 onClick = {
                                     showStatusMenu = false
-                                    if (!order.status.equals(value, ignoreCase = true)) onStatusChange(value)
+                                    if (order.status?.equals(value, ignoreCase = true) != true) onStatusChange(value)
                                 }
                             )
                         }
@@ -216,12 +216,12 @@ fun AdminOrderCard(order: Order, onStatusChange: (String) -> Unit) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.Phone, null, modifier = Modifier.size(16.dp), tint = Color.Gray)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(order.recipientPhone, fontSize = 14.sp)
+                    Text(order.recipientPhone ?: "", fontSize = 14.sp)
                 }
                 Row(verticalAlignment = Alignment.Top) {
                     Icon(Icons.Default.LocationOn, null, modifier = Modifier.size(16.dp).padding(top = 2.dp), tint = Color.Gray)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(order.recipientAddress, fontSize = 14.sp, maxLines = 2, lineHeight = 18.sp)
+                    Text(order.recipientAddress ?: "", fontSize = 14.sp, maxLines = 2, lineHeight = 18.sp)
                 }
                 if (!order.note.isNullOrBlank()) {
                     Row(verticalAlignment = Alignment.Top) {
@@ -245,7 +245,7 @@ fun AdminOrderCard(order: Order, onStatusChange: (String) -> Unit) {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = "Sản phẩm (${order.items.size})", color = MaterialTheme.colorScheme.primary, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "Sản phẩm (${order.items?.size ?: 0})", color = MaterialTheme.colorScheme.primary, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                     Icon(
                         imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
                         contentDescription = null,
@@ -257,7 +257,7 @@ fun AdminOrderCard(order: Order, onStatusChange: (String) -> Unit) {
 
             AnimatedVisibility(visible = isExpanded) {
                 Column(modifier = Modifier.padding(top = 8.dp)) {
-                    order.items.forEach { item ->
+                    order.items?.forEach { item ->
                         AdminOrderItemRow(item)
                         Spacer(modifier = Modifier.height(8.dp))
                     }
@@ -292,7 +292,7 @@ fun AdminOrderItemRow(item: OrderItem) {
         )
         Spacer(modifier = Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
-            Text(item.name, fontSize = 13.sp, fontWeight = FontWeight.Medium, maxLines = 1)
+            Text(item.name ?: "", fontSize = 13.sp, fontWeight = FontWeight.Medium, maxLines = 1)
             Text("${item.brand} | x${item.quantity}", fontSize = 11.sp, color = Color.Gray)
         }
         Text("${String.format(Locale.US, "%.1f", item.unitPrice)}$", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)

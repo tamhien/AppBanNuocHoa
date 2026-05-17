@@ -1,0 +1,349 @@
+-- phpMyAdmin SQL Dump
+-- version 5.2.1
+-- https://www.phpmyadmin.net/
+--
+-- Host: 127.0.0.1
+-- Generation Time: May 17, 2026 at 07:17 AM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Database: `perfumeshop`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `cart`
+--
+
+CREATE TABLE `cart` (
+  `cart_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `perfume_id` int(11) NOT NULL,
+  `quantity` int(11) DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `cart`
+--
+
+INSERT INTO `cart` (`cart_id`, `user_id`, `perfume_id`, `quantity`) VALUES
+(8, 2, 4, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `favorites`
+--
+
+CREATE TABLE `favorites` (
+  `favorite_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `perfume_id` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `favorites`
+--
+
+INSERT INTO `favorites` (`favorite_id`, `user_id`, `perfume_id`, `created_at`) VALUES
+(2, 2, 4, '2026-05-10 05:39:21'),
+(3, 2, 3, '2026-05-10 05:39:22'),
+(4, 20, 12, '2026-05-10 05:49:29'),
+(6, 3, 3, '2026-05-16 13:11:38');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `orderdetails`
+--
+
+CREATE TABLE `orderdetails` (
+  `order_detail_id` int(11) NOT NULL,
+  `order_id` int(11) NOT NULL,
+  `perfume_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `unit_price` decimal(10,2) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `orderdetails`
+--
+
+INSERT INTO `orderdetails` (`order_detail_id`, `order_id`, `perfume_id`, `quantity`, `unit_price`) VALUES
+(1, 1, 1, 1, 120.00),
+(2, 1, 2, 1, 140.00),
+(3, 1, 13, 1, 500.00),
+(4, 2, 4, 1, 160.00),
+(5, 3, 13, 6, 500.00),
+(6, 4, 2, 1, 140.00);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `orders`
+--
+
+CREATE TABLE `orders` (
+  `order_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `order_date` datetime DEFAULT current_timestamp(),
+  `total_amount` decimal(10,2) NOT NULL,
+  `status` enum('pending','confirmed','shipping','completed','cancelled') DEFAULT 'pending',
+  `payment_method` varchar(50) NOT NULL,
+  `recipient_name` varchar(255) NOT NULL,
+  `recipient_phone` varchar(20) NOT NULL,
+  `recipient_address` text NOT NULL,
+  `note` text DEFAULT NULL,
+  `shipping_address` text DEFAULT NULL,
+  `shipping_phone` varchar(15) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `orders`
+--
+
+INSERT INTO `orders` (`order_id`, `user_id`, `order_date`, `total_amount`, `status`, `payment_method`, `recipient_name`, `recipient_phone`, `recipient_address`, `note`, `shipping_address`, `shipping_phone`) VALUES
+(1, 2, '2026-05-13 07:22:10', 760.00, 'completed', 'Thanh toán khi nhận hàng (COD)', 'Hồ Tâm Hiễn ', '09888888881', '123 Đường ABC, Hà Nội', NULL, NULL, NULL),
+(2, 2, '2026-05-13 07:27:47', 160.00, 'completed', 'Thanh toán khi nhận hàng (COD)', 'Hồ Tâm Hiễn ', '09888888881', '123 Đường ABC, Hà Nội', NULL, NULL, NULL),
+(3, 2, '2026-05-13 07:28:34', 3000.00, 'completed', 'Thanh toán khi nhận hàng (COD)', 'Hồ Tâm Hiễn ', '09888888881', 'my da dong', NULL, NULL, NULL),
+(4, 21, '2026-05-13 07:41:23', 140.00, 'completed', 'Chuyển khoản ngân hàng', 'Đỗ Quang Huy', '0956667778', 'Nha Trang', NULL, NULL, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `perfumes`
+--
+
+CREATE TABLE `perfumes` (
+  `perfume_id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `brand` varchar(100) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `stock_quantity` int(11) DEFAULT 0,
+  `image_url` varchar(255) DEFAULT NULL,
+  `gender` enum('Men','Women','Unisex') NOT NULL,
+  `created_at` datetime DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `perfumes`
+--
+
+INSERT INTO `perfumes` (`perfume_id`, `name`, `brand`, `description`, `price`, `stock_quantity`, `image_url`, `gender`, `created_at`, `updated_at`) VALUES
+(1, 'Dior Sauvage', 'Dior', 'Hương thơm nam tính mạnh mẽ với sự kết hợp của cam Bergamot và gỗ đàn hương.', 120.00, 9, '/uploads/1778223531400-986437303.jpg', 'Men', '2026-05-04 23:59:19', '2026-05-13 07:22:10'),
+(2, 'Bleu de Chanel', 'Chanel', 'Sự sang trọng, lịch lãm dành cho phái mạnh.', 140.00, 3, '/uploads/1778223540080-969222416.jpg', 'Men', '2026-05-04 23:59:19', '2026-05-13 07:41:23'),
+(3, 'Gucci Bloom', 'Gucci', 'Một vườn hoa huệ và nhài dành cho những cô nàng dịu dàng.', 130.00, 7, '/uploads/1778223553860-622837258.jpg', 'Women', '2026-05-04 23:59:19', '2026-05-08 13:59:17'),
+(4, 'Chanel No.5', 'Chanel', 'Mùi hương huyền thoại cổ điển quyến rũ nhất mọi thời đại.', 160.00, 2, '/uploads/1778223698901-264862167.jpg', 'Women', '2026-05-04 23:59:19', '2026-05-13 07:27:47'),
+(12, 'Louis Vuitton', 'Louis Vuitton', 'Thom', 200.00, 500, '/uploads/1778224441105-738042715.jpg', 'Unisex', '2026-05-08 14:14:04', '2026-05-08 14:14:04'),
+(13, 'Nước hoa YSL', 'YSL', 'vừa thanh lịch vừa gợi cảm, hợp cho đi chơi, hẹn hò hoặc dùng hằng ngày.', 500.00, 67, '/uploads/1778224679326-197088853.jpg', 'Men', '2026-05-08 14:17:46', '2026-05-13 07:28:34'),
+(14, 'Hermès Terre D’Hermès EDT', 'Hermès', 'hiện đại, quyến rũ, dễ gây chú ý thì Hermès thiên về sự sang trọng, nghệ thuật và trưởng thành hơn.', 115.00, 20, '/uploads/1778224772987-571184768.jpg', 'Women', '2026-05-08 14:19:34', '2026-05-08 14:19:34'),
+(15, 'Nước Hoa Calvin Klein', 'CK One', 'thơm rất dễ chịu và gần như không gây khó chịu cho người xung quanh.', 150.00, 400, '/uploads/1778225027974-609048752.jpg', 'Unisex', '2026-05-08 14:23:11', '2026-05-08 14:23:52');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `users`
+--
+
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL,
+  `username` varchar(50) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `role` enum('admin','user') DEFAULT 'user',
+  `full_name` varchar(100) DEFAULT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `phone` varchar(15) DEFAULT NULL,
+  `address` text DEFAULT NULL,
+  `created_at` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `users`
+--
+
+INSERT INTO `users` (`user_id`, `username`, `password_hash`, `role`, `full_name`, `email`, `phone`, `address`, `created_at`) VALUES
+(1, 'admin', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'admin', 'Quản Trị Viên', 'admin@perfumeshop.com', '0123456789', 'Hệ thống', '2026-05-04 23:59:19'),
+(2, 'user1', 'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3', 'user', 'Hồ Tâm Hiễn ', 'hienht.24it@vku.udn.vn', '09888888881', '123 Đường ABC, Hà Nội', '2026-05-04 23:59:19'),
+(3, 'tamhien', 'f6e0a1e2ac41945a9aa7ff8a8aaa0cebc12a3bcc981a929ad5cf810a090e11ae', 'admin', 'ho tam hien', 'hien@gmail.com', '123455667', 'my da dong', '2026-05-05 23:19:37'),
+(16, 'vanan123', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'user', 'Nguyễn Văn An', 'an@example.com', '0901112223', 'Hà Nội', '2026-05-09 01:57:04'),
+(17, 'thibinh456', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'user', 'Trần Thị Bình', 'binh@example.com', '0912223334', 'Đà Nẵng', '2026-05-09 01:57:04'),
+(18, 'hoanglong789', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'user', 'Lê Hoàng Long', 'long@example.com', '0923334445', 'TP.HCM', '2026-05-09 01:57:04'),
+(19, 'minhthanh01', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'user', 'Phạm Minh Thành', 'thanh@example.com', '0934445556', 'Cần Thơ', '2026-05-09 01:57:04'),
+(20, 'khanhlinh02', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'user', 'Vũ Khánh Linh', 'linh@example.com', '0945556667', 'Hải Phòng', '2026-05-09 01:57:04'),
+(21, 'quanghuy03', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'user', 'Đỗ Quang Huy', 'huy@example.com', '0956667778', 'Nha Trang', '2026-05-09 01:57:04'),
+(22, 'superadmin', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'admin', 'Admin Tổng', 'super@perfumeshop.com', '0999888777', 'Hệ Thống', '2026-05-09 01:57:04');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `verificationcodes`
+--
+
+CREATE TABLE `verificationcodes` (
+  `id` int(11) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `code` varchar(6) NOT NULL,
+  `expires_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `verificationcodes`
+--
+
+INSERT INTO `verificationcodes` (`id`, `email`, `code`, `expires_at`, `created_at`) VALUES
+(4, 'hienht.24it@vku.udn.vn', '271669', '2026-05-10 07:16:25', '2026-05-10 07:11:25'),
+(5, 'hienht.24it@vku.udn.vn', '761783', '2026-05-10 07:17:52', '2026-05-10 07:12:52'),
+(6, 'hienht.24it@vku.udn.vn', '862977', '2026-05-11 11:17:54', '2026-05-11 11:12:54');
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `cart`
+--
+ALTER TABLE `cart`
+  ADD PRIMARY KEY (`cart_id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `perfume_id` (`perfume_id`);
+
+--
+-- Indexes for table `favorites`
+--
+ALTER TABLE `favorites`
+  ADD PRIMARY KEY (`favorite_id`),
+  ADD UNIQUE KEY `user_perfume` (`user_id`,`perfume_id`),
+  ADD KEY `perfume_id` (`perfume_id`);
+
+--
+-- Indexes for table `orderdetails`
+--
+ALTER TABLE `orderdetails`
+  ADD PRIMARY KEY (`order_detail_id`),
+  ADD KEY `order_id` (`order_id`),
+  ADD KEY `perfume_id` (`perfume_id`);
+
+--
+-- Indexes for table `orders`
+--
+ALTER TABLE `orders`
+  ADD PRIMARY KEY (`order_id`),
+  ADD KEY `user_id` (`user_id`);
+
+--
+-- Indexes for table `perfumes`
+--
+ALTER TABLE `perfumes`
+  ADD PRIMARY KEY (`perfume_id`);
+
+--
+-- Indexes for table `users`
+--
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`user_id`),
+  ADD UNIQUE KEY `username` (`username`),
+  ADD UNIQUE KEY `email` (`email`);
+
+--
+-- Indexes for table `verificationcodes`
+--
+ALTER TABLE `verificationcodes`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `cart`
+--
+ALTER TABLE `cart`
+  MODIFY `cart_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
+-- AUTO_INCREMENT for table `favorites`
+--
+ALTER TABLE `favorites`
+  MODIFY `favorite_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT for table `orderdetails`
+--
+ALTER TABLE `orderdetails`
+  MODIFY `order_detail_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT for table `orders`
+--
+ALTER TABLE `orders`
+  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT for table `perfumes`
+--
+ALTER TABLE `perfumes`
+  MODIFY `perfume_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+
+--
+-- AUTO_INCREMENT for table `users`
+--
+ALTER TABLE `users`
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+
+--
+-- AUTO_INCREMENT for table `verificationcodes`
+--
+ALTER TABLE `verificationcodes`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `cart`
+--
+ALTER TABLE `cart`
+  ADD CONSTRAINT `cart_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `cart_ibfk_2` FOREIGN KEY (`perfume_id`) REFERENCES `perfumes` (`perfume_id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `favorites`
+--
+ALTER TABLE `favorites`
+  ADD CONSTRAINT `favorites_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `favorites_ibfk_2` FOREIGN KEY (`perfume_id`) REFERENCES `perfumes` (`perfume_id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `orderdetails`
+--
+ALTER TABLE `orderdetails`
+  ADD CONSTRAINT `orderdetails_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `orderdetails_ibfk_2` FOREIGN KEY (`perfume_id`) REFERENCES `perfumes` (`perfume_id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `orders`
+--
+ALTER TABLE `orders`
+  ADD CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

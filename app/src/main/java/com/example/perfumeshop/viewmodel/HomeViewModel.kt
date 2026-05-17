@@ -189,8 +189,8 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     private fun applyFilters() {
         filteredPerfumes = if (searchQuery.isBlank()) allPerfumes
         else allPerfumes.filter { 
-            it.name.contains(searchQuery, ignoreCase = true) || 
-            it.brand.contains(searchQuery, ignoreCase = true)
+            (it.name?.contains(searchQuery, ignoreCase = true) == true) || 
+            (it.brand?.contains(searchQuery, ignoreCase = true) == true)
         }
     }
 }

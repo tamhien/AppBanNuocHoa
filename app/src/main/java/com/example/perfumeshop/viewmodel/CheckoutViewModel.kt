@@ -47,9 +47,9 @@ class CheckoutViewModel(application: Application) : AndroidViewModel(application
                 if (response.isSuccessful) {
                     val profile = response.body()
                     profile?.let {
-                        recipientName = it.fullName
-                        recipientPhone = it.phone
-                        recipientAddress = it.address
+                        recipientName = it.fullName ?: ""
+                        recipientPhone = it.phone ?: ""
+                        recipientAddress = it.address ?: ""
                     }
                 }
             } catch (e: Exception) {

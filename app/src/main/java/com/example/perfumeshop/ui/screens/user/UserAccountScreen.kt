@@ -158,10 +158,10 @@ fun UpdateProfileDialog(
     onDismiss: () -> Unit,
     onUpdate: (String, String, String, String) -> Unit
 ) {
-    var name by remember { mutableStateOf(user.fullName) }
-    var email by remember { mutableStateOf(user.email) }
-    var phone by remember { mutableStateOf(user.phone) }
-    var address by remember { mutableStateOf(user.address) }
+    var name by remember { mutableStateOf(user.fullName ?: "") }
+    var email by remember { mutableStateOf(user.email ?: "") }
+    var phone by remember { mutableStateOf(user.phone ?: "") }
+    var address by remember { mutableStateOf(user.address ?: "") }
 
     AlertDialog(
         onDismissRequest = onDismiss,

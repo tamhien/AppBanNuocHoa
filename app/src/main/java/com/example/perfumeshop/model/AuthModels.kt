@@ -33,12 +33,12 @@ data class BaseResponse(
 
 data class UserResponse(
     @SerializedName("user_id") val userId: Int,
-    @SerializedName("username") val username: String,
-    @SerializedName("full_name") val fullName: String,
-    @SerializedName("email") val email: String,
-    @SerializedName("phone") val phone: String,
-    @SerializedName("address") val address: String,
-    @SerializedName("role") val role: String
+    @SerializedName("username") val username: String?,
+    @SerializedName("full_name") val fullName: String?,
+    @SerializedName("email") val email: String?,
+    @SerializedName("phone") val phone: String?,
+    @SerializedName("address") val address: String?,
+    @SerializedName("role") val role: String?
 )
 
 data class UpdateProfileRequest(
