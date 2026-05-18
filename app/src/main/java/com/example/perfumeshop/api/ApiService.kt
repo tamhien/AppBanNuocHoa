@@ -108,4 +108,8 @@ interface ApiService {
 
     @GET("reviews/{perfumeId}")
     suspend fun getPerfumeReviews(@Path("perfumeId") perfumeId: Int): Response<List<Review>>
+
+    // Payments
+    @POST("create_payment_url")
+    suspend fun createVnpayUrl(@Body request: VnpayRequest): Response<VnpayResponse>
 }

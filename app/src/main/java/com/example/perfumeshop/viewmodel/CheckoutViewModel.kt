@@ -26,6 +26,7 @@ class CheckoutViewModel(application: Application) : AndroidViewModel(application
 
     var isLoading by mutableStateOf(false)
     var errorMessage by mutableStateOf<String?>(null)
+    var vnpayUrl by mutableStateOf<String?>(null)
 
     val totalAmount: Double
         get() = checkoutItems.sumOf { it.price * it.quantity }
@@ -74,6 +75,7 @@ class CheckoutViewModel(application: Application) : AndroidViewModel(application
 
         isLoading = true
         errorMessage = null
+        vnpayUrl = null
 
         val request = OrderRequest(
             userId = userId,
@@ -93,17 +95,45 @@ class CheckoutViewModel(application: Application) : AndroidViewModel(application
                 
                 if (response.isSuccessful && result != null) {
                     if (result.success) {
-                        onSuccess(result.orderId ?: 0)
+                        val orderId = result.orderId ?: 0
+                        if (paymentMethod == "Thanh toán qua VNPAY") {
+                            createVnpayPayment(orderId, onSuccess)
+                        } else {
+                            isLoading = false
+                            onSuccess(orderId)
+                        }
                     } else {
                         errorMessage = result.message
+                        isLoading = false
                     }
                 } else {
-                    // Xử lý khi response không thành công (ví dụ 404, 500)
-                    val errorMsg = response.errorBody()?.string() ?: "Lỗi kết nối Server"
-                    errorMessage = "Thanh toán thất bại: $errorMsg"
+                    isLoading = false
+                    errorMessage = "Thanh toán thất bại: Lỗi hệ thống"
                 }
             } catch (e: Exception) {
                 errorMessage = "Lỗi mạng: ${e.message}"
+                isLoading = false
+            }
+        }
+    }
+
+    private fun createVnpayPayment(orderId: Int, onSuccess: (Int) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val vnpayRequest = com.example.perfumeshop.model.VnpayRequest(
+                    orderId = orderId,
+                    amount = totalAmount
+                )
+                val response = apiService.createVnpayUrl(vnpayRequest)
+                val result = response.body()
+                
+                if (response.isSuccessful && result != null && result.success) {
+                    vnpayUrl = result.url
+                } else {
+                    errorMessage = "Không thể tạo liên kết VNPay: ${result?.message ?: "Lỗi hệ thống"}"
+                }
+            } catch (e: Exception) {
+                errorMessage = "Lỗi khi kết nối VNPay: ${e.message}"
             } finally {
                 isLoading = false
             }

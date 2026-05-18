@@ -7,6 +7,7 @@ const upload = require('../controllers/upload.controller');
 const favorite = require('../controllers/favorite.controller');
 const cart = require('../controllers/cart.controller');
 const review = require('../controllers/review.controller');
+const payment = require('../controllers/payment.controller');
 
 // Auth
 router.post('/login', auth.login);
@@ -57,5 +58,10 @@ router.delete('/cart/:cartId', cart.deleteCartItem);
 // Reviews
 router.post('/reviews', review.addReview);
 router.get('/reviews/:perfumeId', review.getPerfumeReviews);
+
+// Payments (VNPay)
+router.post('/create_payment_url', payment.createVnpayUrl);
+router.get('/vnpay_return', payment.vnpayReturn);
+router.get('/vnpay_ipn', payment.vnpayIpn);
 
 module.exports = router;

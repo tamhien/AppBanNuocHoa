@@ -83,3 +83,15 @@ data class ReviewRequest(
     @SerializedName("rating") val rating: Int,
     @SerializedName("comment") val comment: String
 )
+
+data class VnpayRequest(
+    @SerializedName("order_id") val orderId: Int,
+    @SerializedName("amount") val amount: Double,
+    @SerializedName("bankCode") val bankCode: String = ""
+)
+
+data class VnpayResponse(
+    @SerializedName("success") val success: Boolean,
+    @SerializedName("message") val message: String,
+    @SerializedName("url") val url: String?
+)
