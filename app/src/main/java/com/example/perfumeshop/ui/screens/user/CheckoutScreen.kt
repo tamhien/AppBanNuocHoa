@@ -4,6 +4,7 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -233,15 +234,21 @@ fun CheckoutScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Color.White)
+                    .clickable(enabled = true, onClick = {}) 
             ) {
                 AndroidView(
                     factory = { context ->
                         WebView(context).apply {
-                            settings.javaScriptEnabled = true
-                            settings.domStorageEnabled = true
-                            settings.useWideViewPort = true
-                            settings.loadWithOverviewMode = true
-                            settings.javaScriptCanOpenWindowsAutomatically = true
+                            settings.apply {
+                                javaScriptEnabled = true
+                                domStorageEnabled = true
+                                databaseEnabled = true
+                                useWideViewPort = true
+                                loadWithOverviewMode = true
+                                javaScriptCanOpenWindowsAutomatically = true
+                                setSupportMultipleWindows(false) // Đổi thành false để tải trong cùng WebView
+                                mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+                            }
                             
                             webChromeClient = android.webkit.WebChromeClient()
                             
@@ -258,10 +265,11 @@ fun CheckoutScreen(
                                         }
                                         return true
                                     }
-                                    return false
+                                    return false // Cho phép các URL khác (như trang nhập OTP) load bình thường
                                 }
                             }
                             loadUrl(url)
+                            requestFocus()
                         }
                     },
                     modifier = Modifier.fillMaxSize()
