@@ -1,11 +1,16 @@
 const db = require('../config/db');
-
 exports.checkout = async (req, res) => {
     const { user_id, selected_cart_ids, total_amount, payment_method, recipient_name, recipient_phone, recipient_address, note } = req.body;
 
-    console.log(">>> [ORDER] Request received:", req.body);
+    console.log("====================================================");
+    console.log(">>> [NEW ORDER REQUEST] Time:", new Date().toLocaleString());
+    console.log(">>> User ID:", user_id);
+    console.log(">>> Method:", payment_method);
+    console.log(">>> Cart IDs:", selected_cart_ids);
+    console.log("====================================================");
 
     if (!user_id || !selected_cart_ids || !Array.isArray(selected_cart_ids) || selected_cart_ids.length === 0) {
+        console.error(">>> [ORDER CHECKOUT] Lỗi: Dữ liệu đầu vào không hợp lệ");
         return res.status(200).json({ success: false, message: "Dữ liệu không hợp lệ hoặc không có sản phẩm được chọn" });
     }
 
@@ -13,16 +18,17 @@ exports.checkout = async (req, res) => {
     await connection.beginTransaction();
 
     try {
-        // 1. Tạo Đơn hàng - Sử dụng tên bảng 'orders' viết thường
+        // 1. Tạo Đơn hàng
         const [orderResult] = await connection.query(
-            "INSERT INTO orders (user_id, total_amount, payment_method, recipient_name, recipient_phone, recipient_address, note) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            [user_id, total_amount, payment_method, recipient_name, recipient_phone, recipient_address, note]
+            "INSERT INTO orders (user_id, total_amount, payment_method, recipient_name, recipient_phone, recipient_address, note, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            [user_id, total_amount, payment_method, recipient_name, recipient_phone, recipient_address, note, 'pending']
         );
         const orderId = orderResult.insertId;
+        console.log(">>> [ORDER CHECKOUT] Đã tạo đơn hàng ID:", orderId);
 
         // 2. Chốt chi tiết đơn hàng
         const [itemsToOrder] = await connection.query(`
-            SELECT c.perfume_id, c.quantity, p.price
+            SELECT c.perfume_id, c.quantity, p.price, p.name, p.stock_quantity
             FROM cart c
             JOIN perfumes p ON c.perfume_id = p.perfume_id
             WHERE c.cart_id IN (?)
@@ -34,9 +40,8 @@ exports.checkout = async (req, res) => {
 
         for (let item of itemsToOrder) {
             // Kiểm tra tồn kho
-            const [stockRows] = await connection.query("SELECT stock_quantity, name FROM perfumes WHERE perfume_id = ?", [item.perfume_id]);
-            if (stockRows.length === 0 || stockRows[0].stock_quantity < item.quantity) {
-                throw new Error(`Sản phẩm ${stockRows[0]?.name || ''} không đủ số lượng trong kho`);
+            if (item.stock_quantity < item.quantity) {
+                throw new Error(`Sản phẩm ${item.name} không đủ số lượng trong kho`);
             }
 
             // Lưu vào orderdetails
@@ -50,17 +55,25 @@ exports.checkout = async (req, res) => {
                 "UPDATE perfumes SET stock_quantity = stock_quantity - ? WHERE perfume_id = ?",
                 [item.quantity, item.perfume_id]
             );
+            console.log(`>>> [ORDER CHECKOUT] Đã trừ kho sản phẩm ID: ${item.perfume_id}`);
         }
 
         // 3. Xóa các sản phẩm đã thanh toán khỏi cart
-        await connection.query("DELETE FROM cart WHERE cart_id IN (?)", [selected_cart_ids]);
+        const [delResult] = await connection.query("DELETE FROM cart WHERE cart_id IN (?)", [selected_cart_ids]);
+        console.log(">>> [ORDER CHECKOUT] Đã xóa giỏ hàng, số dòng:", delResult.affectedRows);
 
         await connection.commit();
-        res.status(200).json({ success: true, order_id: orderId, message: "Đặt hàng thành công!" });
+        console.log(">>> [ORDER CHECKOUT] HOÀN TẤT TRANSACTION CHO ĐƠN HÀNG:", orderId);
+
+        res.status(200).json({
+            success: true,
+            order_id: orderId,
+            message: "Đặt hàng thành công!"
+        });
 
     } catch (err) {
         await connection.rollback();
-        console.error(">>> [ORDER] Error:", err.message);
+        console.error(">>> [ORDER CHECKOUT] LỖI VÀ ĐÃ ROLLBACK:", err.message);
         res.status(200).json({ success: false, message: "Lỗi Server: " + err.message });
     } finally {
         connection.release();

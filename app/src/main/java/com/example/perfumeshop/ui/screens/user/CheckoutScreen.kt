@@ -246,15 +246,30 @@ fun CheckoutScreen(
                                 useWideViewPort = true
                                 loadWithOverviewMode = true
                                 javaScriptCanOpenWindowsAutomatically = true
-                                setSupportMultipleWindows(false) // Đổi thành false để tải trong cùng WebView
+                                // Cấu hình quan trọng: Bật đa cửa sổ và xử lý nó để load ngay tại đây (tránh bị kẹt nút Tiếp tục)
+                                setSupportMultipleWindows(true) 
                                 mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+                                // Giả lập User Agent của trình duyệt chuẩn để tránh bị chặn script hoặc lỗi giao diện ở các trang ngân hàng
+                                userAgentString = "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
+                                allowFileAccess = true
+                                allowContentAccess = true
                             }
                             
-                            webChromeClient = android.webkit.WebChromeClient()
+                            webChromeClient = object : android.webkit.WebChromeClient() {
+                                override fun onCreateWindow(view: WebView?, isDialog: Boolean, isUserGesture: Boolean, resultMsg: android.os.Message?): Boolean {
+                                    // Cách xử lý chuẩn để buộc pop-up ngân hàng (OTP) mở ngay trên WebView hiện tại
+                                    val transport = resultMsg?.obj as? WebView.WebViewTransport
+                                    transport?.webView = view // Sử dụng chính WebView này cho cửa sổ mới
+                                    resultMsg?.sendToTarget()
+                                    return true
+                                }
+                            }
                             
                             webViewClient = object : WebViewClient() {
                                 override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                                     val currentUrl = request?.url.toString()
+                                    
+                                    // Chặn và xử lý URL trả về từ VNPAY
                                     if (currentUrl.contains("vnpay_return")) {
                                         if (currentUrl.contains("vnp_ResponseCode=00")) {
                                             viewModel.vnpayUrl = null
@@ -265,7 +280,20 @@ fun CheckoutScreen(
                                         }
                                         return true
                                     }
-                                    return false // Cho phép các URL khác (như trang nhập OTP) load bình thường
+                                    
+                                    // Cho phép WebView tự xử lý các URL ngân hàng, OTP, v.v.
+                                    return false 
+                                }
+
+                                override fun onPageFinished(view: WebView?, url: String?) {
+                                    super.onPageFinished(view, url)
+                                    // Dự phòng cho trường hợp redirect bằng JavaScript
+                                    if (url?.contains("vnpay_return") == true) {
+                                        if (url.contains("vnp_ResponseCode=00")) {
+                                            viewModel.vnpayUrl = null
+                                            onOrderSuccess(0)
+                                        }
+                                    }
                                 }
                             }
                             loadUrl(url)
