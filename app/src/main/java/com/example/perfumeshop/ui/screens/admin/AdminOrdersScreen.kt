@@ -41,7 +41,7 @@ fun AdminOrdersScreen(viewModel: AdminViewModel) {
     val statusList = listOf(
         "All" to "Tất cả",
         "Pending" to "Chờ xác nhận",
-        "Processing" to "Đã xác nhận",
+        "confirmed" to "Đã xác nhận",
         "Shipping" to "Đang vận chuyển",
         "Completed" to "Đã giao",
         "Cancelled" to "Đã hủy"
@@ -168,7 +168,7 @@ fun AdminOrderCard(order: Order, onStatusChange: (String) -> Unit) {
 
     val statusOptions = listOf(
         "Pending" to "Chờ xác nhận",
-        "Processing" to "Đã xác nhận",
+        "confirmed" to "Đã xác nhận",
         "Shipping" to "Đang vận chuyển",
         "Completed" to "Đã giao",
         "Cancelled" to "Đã hủy"
@@ -301,12 +301,12 @@ fun AdminOrderItemRow(item: OrderItem) {
 
 @Composable
 fun StatusChipAdmin(status: String, onClick: () -> Unit) {
-    val (color, text) = when (status) {
-        "Pending" -> Color(0xFFFFA000) to "Chờ xác nhận"
-        "Processing" -> Color(0xFF1976D2) to "Đã xác nhận"
-        "Shipping" -> Color(0xFFFF9800) to "Đang vận chuyển"
-        "Completed" -> Color(0xFF388E3C) to "Đã giao"
-        "Cancelled" -> Color(0xFFD32F2F) to "Đã hủy"
+    val (color, text) = when (status.lowercase()) {
+        "pending" -> Color(0xFFFFA000) to "Chờ xác nhận"
+        "processing", "confirmed" -> Color(0xFF1976D2) to "Đã xác nhận"
+        "shipping" -> Color(0xFFFF9800) to "Đang vận chuyển"
+        "completed" -> Color(0xFF388E3C) to "Đã giao"
+        "cancelled" -> Color(0xFFD32F2F) to "Đã hủy"
         else -> Color.Gray to status
     }
 

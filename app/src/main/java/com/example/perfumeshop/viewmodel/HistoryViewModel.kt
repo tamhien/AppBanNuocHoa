@@ -28,7 +28,7 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
     val statuses = listOf(
         "All" to "Tất cả",
         "Pending" to "Chờ xác nhận",
-        "Processing" to "Đang xử lý",
+        "confirmed" to "Đang xử lý",
         "Shipping" to "Đang giao",
         "Completed" to "Hoàn thành",
         "Cancelled" to "Đã hủy"

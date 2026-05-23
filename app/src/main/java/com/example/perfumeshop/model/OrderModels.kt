@@ -23,7 +23,7 @@ data class Order(
     @SerializedName("order_id") val orderId: Int,
     @SerializedName("user_id") val userId: Int,
     @SerializedName("total_amount") val totalAmount: Double,
-    @SerializedName("status") val status: String?, // Pending, Processing, Shipping, Completed, Cancelled
+    @SerializedName("status") val status: String?, // Pending, confirmed/Processing, Shipping, Completed, Cancelled
     @SerializedName("payment_method") val paymentMethod: String?,
     @SerializedName("recipient_name") val recipientName: String?,
     @SerializedName("recipient_phone") val recipientPhone: String?,
