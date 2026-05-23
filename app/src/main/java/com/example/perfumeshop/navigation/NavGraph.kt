@@ -81,6 +81,36 @@ fun NavGraph() {
                     }
                     // Sau khi đặt hàng thành công, cần fetch lại cart vì server đã xóa items
                     cartViewModel.fetchCart()
+                },
+                onNavigateToPayment = { url, orderId ->
+                    navController.navigate(Screen.PaymentWebView.createRoute(url, orderId))
+                }
+            )
+        }
+        composable(
+            route = Screen.PaymentWebView.route,
+            arguments = listOf(
+                navArgument("url") { type = NavType.StringType },
+                navArgument("orderId") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val url = backStackEntry.arguments?.getString("url")?.let { 
+                java.net.URLDecoder.decode(it, "UTF-8") 
+            } ?: ""
+            val orderId = backStackEntry.arguments?.getInt("orderId") ?: 0
+            
+            PaymentWebViewScreen(
+                url = url,
+                onBack = { navController.popBackStack() },
+                onPaymentFinished = { success ->
+                    if (success) {
+                        navController.navigate(Screen.OrderSuccess.createRoute(orderId)) {
+                            popUpTo(Screen.Cart.route) { inclusive = true }
+                        }
+                        cartViewModel.fetchCart()
+                    } else {
+                        navController.popBackStack()
+                    }
                 }
             )
         }

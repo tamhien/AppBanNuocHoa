@@ -26,7 +26,6 @@ class CheckoutViewModel(application: Application) : AndroidViewModel(application
 
     var isLoading by mutableStateOf(false)
     var errorMessage by mutableStateOf<String?>(null)
-    var vnpayUrl by mutableStateOf<String?>(null)
 
     val totalAmount: Double
         get() = checkoutItems.sumOf { it.price * it.quantity }
@@ -75,7 +74,6 @@ class CheckoutViewModel(application: Application) : AndroidViewModel(application
 
         isLoading = true
         errorMessage = null
-        vnpayUrl = null
 
         val request = OrderRequest(
             userId = userId,
@@ -93,22 +91,26 @@ class CheckoutViewModel(application: Application) : AndroidViewModel(application
                 val response = apiService.checkout(request)
                 val result = response.body()
                 
-                if (response.isSuccessful && result != null) {
-                    if (result.success) {
-                        val orderId = result.orderId ?: 0
-                        if (paymentMethod == "Thanh toán qua VNPAY") {
-                            createVnpayPayment(orderId, onSuccess)
+                if (response.isSuccessful && result != null && result.success) {
+                    val orderId = result.orderId ?: 0
+                    lastOrderId = orderId
+                    
+                    if (paymentMethod == "Thanh toán qua VNPay") {
+                        val vnpayResponse = apiService.createVnpayUrl(com.example.perfumeshop.model.VnpayRequest(orderId, totalAmount))
+                        if (vnpayResponse.isSuccessful && vnpayResponse.body()?.success == true) {
+                            isLoading = false
+                            vnpayUrl = vnpayResponse.body()?.url
                         } else {
                             isLoading = false
-                            onSuccess(orderId)
+                            errorMessage = vnpayResponse.body()?.message ?: "Không thể tạo liên kết thanh toán VNPay"
                         }
                     } else {
-                        errorMessage = result.message
                         isLoading = false
+                        onSuccess(orderId)
                     }
                 } else {
                     isLoading = false
-                    errorMessage = "Thanh toán thất bại: Lỗi hệ thống"
+                    errorMessage = result?.message ?: "Thanh toán thất bại: Lỗi hệ thống"
                 }
             } catch (e: Exception) {
                 errorMessage = "Lỗi mạng: ${e.message}"
@@ -117,40 +119,33 @@ class CheckoutViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    private fun createVnpayPayment(orderId: Int, onSuccess: (Int) -> Unit) {
-        viewModelScope.launch {
-            try {
-                val vnpayRequest = com.example.perfumeshop.model.VnpayRequest(
-                    orderId = orderId,
-                    amount = totalAmount
-                )
-                val response = apiService.createVnpayUrl(vnpayRequest)
-                val result = response.body()
-                
-                if (response.isSuccessful && result != null && result.success) {
-                    vnpayUrl = result.url
-                } else {
-                    errorMessage = "Không thể tạo liên kết VNPay: ${result?.message ?: "Lỗi hệ thống"}"
-                }
-            } catch (e: Exception) {
-                errorMessage = "Lỗi khi kết nối VNPay: ${e.message}"
-            } finally {
-                isLoading = false
-            }
-        }
-    }
+    var vnpayUrl by mutableStateOf<String?>(null)
+    var lastOrderId by mutableStateOf(0)
 
     private fun validateInfo(): Boolean {
-        if (recipientName.isBlank()) {
+        if (recipientName.trim().isBlank()) {
             errorMessage = "Họ tên người nhận không được để trống"
             return false
         }
-        if (recipientPhone.isBlank()) {
+        if (recipientPhone.trim().isBlank()) {
             errorMessage = "Số điện thoại không được để trống"
             return false
         }
-        if (recipientAddress.isBlank()) {
+        val phoneRegex = "^[0-9]{10,11}$".toRegex()
+        if (!phoneRegex.matches(recipientPhone.trim())) {
+            errorMessage = "Số điện thoại không hợp lệ (10-11 chữ số)"
+            return false
+        }
+        if (recipientAddress.trim().isBlank()) {
             errorMessage = "Địa chỉ giao hàng không được để trống"
+            return false
+        }
+        if (checkoutItems.isEmpty()) {
+            errorMessage = "Giỏ hàng trống"
+            return false
+        }
+        if (totalAmount <= 0) {
+            errorMessage = "Tổng số tiền không hợp lệ"
             return false
         }
         return true

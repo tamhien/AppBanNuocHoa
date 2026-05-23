@@ -15,4 +15,7 @@ sealed class Screen(val route: String) {
     object OrderSuccess : Screen("order_success/{orderId}") {
         fun createRoute(orderId: Int) = "order_success/$orderId"
     }
+    object PaymentWebView : Screen("payment_webview/{url}/{orderId}") {
+        fun createRoute(url: String, orderId: Int) = "payment_webview/${java.net.URLEncoder.encode(url, "UTF-8")}/$orderId"
+    }
 }

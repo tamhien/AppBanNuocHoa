@@ -35,6 +35,11 @@ async function createVnpayUrl(req, res) {
     let vnpUrl = process.env.VNP_URL;
     const returnUrl = process.env.VNP_RETURN_URL;
 
+    if (!tmnCode || !secretKey || !vnpUrl || !returnUrl) {
+      console.error(">>> [VNPAY ERROR] Thiếu cấu hình .env (VNP_TMN_CODE, VNP_HASH_SECRET, etc.)");
+      return res.status(200).json({ success: false, message: "Hệ thống chưa cấu hình thanh toán VNPay" });
+    }
+
     const date = new Date();
     const createDate = moment(date).format('YYYYMMDDHHmmss');
     const expireDate = moment(date).add(15, 'minutes').format('YYYYMMDDHHmmss');

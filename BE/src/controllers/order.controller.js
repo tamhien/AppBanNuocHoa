@@ -18,10 +18,13 @@ exports.checkout = async (req, res) => {
     await connection.beginTransaction();
 
     try {
+        // Xác định trạng thái ban đầu: COD thì hoàn thành ngay, VNPay thì chờ (pending)
+        const initialStatus = (payment_method === 'Thanh toán khi nhận hàng (COD)') ? 'completed' : 'pending';
+
         // 1. Tạo Đơn hàng
         const [orderResult] = await connection.query(
             "INSERT INTO orders (user_id, total_amount, payment_method, recipient_name, recipient_phone, recipient_address, note, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-            [user_id, total_amount, payment_method, recipient_name, recipient_phone, recipient_address, note, 'pending']
+            [user_id, total_amount, payment_method, recipient_name, recipient_phone, recipient_address, note, initialStatus]
         );
         const orderId = orderResult.insertId;
         console.log(">>> [ORDER CHECKOUT] Đã tạo đơn hàng ID:", orderId);

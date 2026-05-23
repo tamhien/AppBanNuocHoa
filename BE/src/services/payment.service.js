@@ -23,9 +23,9 @@ async function createPayment(payload) {
         );
     }
 
-    // Cập nhật trạng thái đơn hàng sang 'confirmed'
+    // Cập nhật trạng thái đơn hàng sang 'completed' (Đồng bộ với luồng COD)
     await connection.query(
-        "UPDATE orders SET status = 'confirmed' WHERE order_id = ?",
+        "UPDATE orders SET status = 'completed' WHERE order_id = ?",
         [numericOrderId]
     );
 

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 22, 2026 at 11:41 AM
+-- Generation Time: May 23, 2026 at 05:32 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -33,6 +33,13 @@ CREATE TABLE `cart` (
   `perfume_id` int(11) NOT NULL,
   `quantity` int(11) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `cart`
+--
+
+INSERT INTO `cart` (`cart_id`, `user_id`, `perfume_id`, `quantity`) VALUES
+(140, 2, 4, 1);
 
 -- --------------------------------------------------------
 
@@ -112,8 +119,7 @@ INSERT INTO `orderdetails` (`order_detail_id`, `order_id`, `perfume_id`, `quanti
 (121, 136, 4, 1, 160.00),
 (122, 137, 3, 1, 130.00),
 (123, 138, 4, 1, 160.00),
-(128, 143, 4, 1, 160.00),
-(129, 146, 3, 1, 130.00);
+(128, 143, 4, 1, 160.00);
 
 -- --------------------------------------------------------
 
@@ -170,8 +176,21 @@ INSERT INTO `orders` (`order_id`, `user_id`, `order_date`, `total_amount`, `stat
 (136, 17, '2026-05-20 19:55:26', 160.00, 'pending', 'Thanh toán khi nhận hàng (COD)', 'Trần Thị Bình', '0912223334', 'Đà Nẵng', NULL, NULL, NULL),
 (137, 17, '2026-05-20 19:55:45', 130.00, 'pending', 'Thanh toán qua VNPAY', 'Trần Thị Bình', '0912223334', 'Đà Nẵng', NULL, NULL, NULL),
 (138, 17, '2026-05-20 19:56:29', 160.00, 'pending', 'Thanh toán qua VNPAY', 'Trần Thị Bình', '0912223334', 'Đà Nẵng', NULL, NULL, NULL),
-(143, 17, '2026-05-20 20:29:03', 160.00, 'pending', 'Thanh toán qua VNPAY', 'Trần Thị Bình', '0912223334', 'Đà Nẵng', NULL, NULL, NULL),
-(146, 17, '2026-05-20 20:30:15', 130.00, 'completed', 'Thanh toán qua VNPAY', 'Trần Thị Bình', '0912223334', 'Đà Nẵng', NULL, NULL, NULL);
+(143, 17, '2026-05-20 20:29:03', 160.00, 'pending', 'Thanh toán qua VNPAY', 'Trần Thị Bình', '0912223334', 'Đà Nẵng', NULL, NULL, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `payments`
+--
+
+CREATE TABLE `payments` (
+  `payment_id` int(11) NOT NULL,
+  `order_id` int(11) NOT NULL,
+  `amount_paid` decimal(10,2) NOT NULL,
+  `payment_method` varchar(50) NOT NULL,
+  `payment_date` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -197,13 +216,13 @@ CREATE TABLE `perfumes` (
 --
 
 INSERT INTO `perfumes` (`perfume_id`, `name`, `brand`, `description`, `price`, `stock_quantity`, `image_url`, `gender`, `created_at`, `updated_at`) VALUES
-(1, 'Dior Sauvage', 'Dior', 'Hương thơm nam tính mạnh mẽ với sự kết hợp của cam Bergamot và gỗ đàn hương.', 120.00, 1, '/uploads/1778223531400-986437303.jpg', 'Men', '2026-05-04 23:59:19', '2026-05-20 20:09:39'),
-(2, 'Bleu de Chanel', 'Chanel', 'Sự sang trọng, lịch lãm dành cho phái mạnh.', 140.00, 30, '/uploads/1778223540080-969222416.jpg', 'Men', '2026-05-04 23:59:19', '2026-05-20 19:38:23'),
-(3, 'Gucci Bloom', 'Gucci', 'Một vườn hoa huệ và nhài dành cho những cô nàng dịu dàng.', 130.00, 210, '/uploads/1778223553860-622837258.jpg', 'Women', '2026-05-04 23:59:19', '2026-05-20 20:30:15'),
-(4, 'Chanel No.5', 'Chanel', 'Mùi hương huyền thoại cổ điển quyến rũ nhất mọi thời đại.', 160.00, 482, '/uploads/1778223698901-264862167.jpg', 'Women', '2026-05-04 23:59:19', '2026-05-20 20:29:03'),
-(12, 'Louis Vuitton', 'Louis Vuitton', 'Thom', 200.00, 482, '/uploads/1778224441105-738042715.jpg', 'Unisex', '2026-05-08 14:14:04', '2026-05-20 19:31:40'),
-(13, 'Nước hoa YSL', 'YSL', 'vừa thanh lịch vừa gợi cảm, hợp cho đi chơi, hẹn hò hoặc dùng hằng ngày.', 500.00, 46, '/uploads/1778224679326-197088853.jpg', 'Men', '2026-05-08 14:17:46', '2026-05-20 19:34:11'),
-(14, 'Hermès Terre D’Hermès EDT', 'Hermès', 'hiện đại, quyến rũ, dễ gây chú ý thì Hermès thiên về sự sang trọng, nghệ thuật và trưởng thành hơn.', 115.00, 9, '/uploads/1778224772987-571184768.jpg', 'Women', '2026-05-08 14:19:34', '2026-05-20 19:51:49'),
+(1, 'Dior Sauvage', 'Dior', 'Hương thơm nam tính mạnh mẽ với sự kết hợp của cam Bergamot và gỗ đàn hương.', 120.00, 0, '/uploads/1778223531400-986437303.jpg', 'Men', '2026-05-04 23:59:19', '2026-05-23 22:01:23'),
+(2, 'Bleu de Chanel', 'Chanel', 'Sự sang trọng, lịch lãm dành cho phái mạnh.', 140.00, 28, '/uploads/1778223540080-969222416.jpg', 'Men', '2026-05-04 23:59:19', '2026-05-23 22:16:13'),
+(3, 'Gucci Bloom', 'Gucci', 'Một vườn hoa huệ và nhài dành cho những cô nàng dịu dàng.', 130.00, 209, '/uploads/1778223553860-622837258.jpg', 'Women', '2026-05-04 23:59:19', '2026-05-23 21:49:58'),
+(4, 'Chanel No.5', 'Chanel', 'Mùi hương huyền thoại cổ điển quyến rũ nhất mọi thời đại.', 160.00, 481, '/uploads/1778223698901-264862167.jpg', 'Women', '2026-05-04 23:59:19', '2026-05-23 21:32:05'),
+(12, 'Louis Vuitton', 'Louis Vuitton', 'Thom', 200.00, 480, '/uploads/1778224441105-738042715.jpg', 'Unisex', '2026-05-08 14:14:04', '2026-05-23 21:51:07'),
+(13, 'Nước hoa YSL', 'YSL', 'vừa thanh lịch vừa gợi cảm, hợp cho đi chơi, hẹn hò hoặc dùng hằng ngày.', 500.00, 45, '/uploads/1778224679326-197088853.jpg', 'Men', '2026-05-08 14:17:46', '2026-05-23 22:17:18'),
+(14, 'Hermès Terre D’Hermès EDT', 'Hermès', 'hiện đại, quyến rũ, dễ gây chú ý thì Hermès thiên về sự sang trọng, nghệ thuật và trưởng thành hơn.', 115.00, 8, '/uploads/1778224772987-571184768.jpg', 'Women', '2026-05-08 14:19:34', '2026-05-23 21:56:24'),
 (15, 'Nước Hoa Calvin Klein', 'CK One', 'thơm rất dễ chịu và gần như không gây khó chịu cho người xung quanh.', 150.00, 6, '/uploads/1778225027974-609048752.jpg', 'Unisex', '2026-05-08 14:23:11', '2026-05-20 19:48:17');
 
 -- --------------------------------------------------------
@@ -342,6 +361,12 @@ ALTER TABLE `orders`
   ADD KEY `user_id` (`user_id`);
 
 --
+-- Indexes for table `payments`
+--
+ALTER TABLE `payments`
+  ADD PRIMARY KEY (`payment_id`);
+
+--
 -- Indexes for table `perfumes`
 --
 ALTER TABLE `perfumes`
@@ -378,7 +403,7 @@ ALTER TABLE `verificationcodes`
 -- AUTO_INCREMENT for table `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `cart_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=131;
+  MODIFY `cart_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=141;
 
 --
 -- AUTO_INCREMENT for table `favorites`
@@ -390,13 +415,19 @@ ALTER TABLE `favorites`
 -- AUTO_INCREMENT for table `orderdetails`
 --
 ALTER TABLE `orderdetails`
-  MODIFY `order_detail_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=130;
+  MODIFY `order_detail_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=139;
 
 --
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=147;
+  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=157;
+
+--
+-- AUTO_INCREMENT for table `payments`
+--
+ALTER TABLE `payments`
+  MODIFY `payment_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `perfumes`

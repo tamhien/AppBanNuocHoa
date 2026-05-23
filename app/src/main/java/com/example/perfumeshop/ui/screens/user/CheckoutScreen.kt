@@ -1,8 +1,5 @@
 package com.example.perfumeshop.ui.screens.user
 
-import android.webkit.WebResourceRequest
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -22,7 +19,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.perfumeshop.api.RetrofitClient
@@ -36,10 +32,18 @@ fun CheckoutScreen(
     items: List<CartItem>,
     onBack: () -> Unit,
     onOrderSuccess: (Int) -> Unit,
+    onNavigateToPayment: (String, Int) -> Unit,
     viewModel: CheckoutViewModel = viewModel()
 ) {
     LaunchedEffect(items) {
         viewModel.checkoutItems = items
+    }
+
+    LaunchedEffect(viewModel.vnpayUrl) {
+        viewModel.vnpayUrl?.let { url ->
+            onNavigateToPayment(url, viewModel.lastOrderId)
+            viewModel.vnpayUrl = null // Reset after navigation
+        }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -148,9 +152,7 @@ fun CheckoutScreen(
                     SectionTitle("Phương thức thanh toán", Icons.Default.Payment)
                     val paymentMethods = listOf(
                         "Thanh toán khi nhận hàng (COD)",
-                        "Thanh toán qua VNPAY",
-                        "Chuyển khoản ngân hàng",
-                        "Ví điện tử (Momo/ZaloPay)"
+                        "Thanh toán qua VNPay"
                     )
                     Card(
                         modifier = Modifier.fillMaxWidth(),
@@ -224,100 +226,6 @@ fun CheckoutScreen(
                             modifier = Modifier.padding(vertical = 16.dp)
                         )
                     }
-                }
-            }
-        }
-
-        // WebView Overlay cho VNPay
-        viewModel.vnpayUrl?.let { url ->
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.White)
-                    .clickable(enabled = true, onClick = {}) 
-            ) {
-                AndroidView(
-                    factory = { context ->
-                        WebView(context).apply {
-                            settings.apply {
-                                javaScriptEnabled = true
-                                domStorageEnabled = true
-                                databaseEnabled = true
-                                useWideViewPort = true
-                                loadWithOverviewMode = true
-                                javaScriptCanOpenWindowsAutomatically = true
-                                // Cấu hình quan trọng: Bật đa cửa sổ và xử lý nó để load ngay tại đây (tránh bị kẹt nút Tiếp tục)
-                                setSupportMultipleWindows(true) 
-                                mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-                                // Giả lập User Agent của trình duyệt chuẩn để tránh bị chặn script hoặc lỗi giao diện ở các trang ngân hàng
-                                userAgentString = "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
-                                allowFileAccess = true
-                                allowContentAccess = true
-                            }
-                            
-                            webChromeClient = object : android.webkit.WebChromeClient() {
-                                override fun onCreateWindow(view: WebView?, isDialog: Boolean, isUserGesture: Boolean, resultMsg: android.os.Message?): Boolean {
-                                    // Cách xử lý chuẩn để buộc pop-up ngân hàng (OTP) mở ngay trên WebView hiện tại
-                                    val transport = resultMsg?.obj as? WebView.WebViewTransport
-                                    transport?.webView = view // Sử dụng chính WebView này cho cửa sổ mới
-                                    resultMsg?.sendToTarget()
-                                    return true
-                                }
-                            }
-                            
-                            webViewClient = object : WebViewClient() {
-                                override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
-                                    val currentUrl = request?.url.toString()
-                                    
-                                    // Chặn và xử lý URL trả về từ VNPAY
-                                    if (currentUrl.contains("vnpay_return")) {
-                                        if (currentUrl.contains("vnp_ResponseCode=00")) {
-                                            viewModel.vnpayUrl = null
-                                            onOrderSuccess(0) 
-                                        } else {
-                                            viewModel.vnpayUrl = null
-                                            viewModel.errorMessage = "Thanh toán không thành công"
-                                        }
-                                        return true
-                                    }
-                                    
-                                    // Cho phép WebView tự xử lý các URL ngân hàng, OTP, v.v.
-                                    return false 
-                                }
-
-                                override fun onPageFinished(view: WebView?, url: String?) {
-                                    super.onPageFinished(view, url)
-                                    // Dự phòng cho trường hợp redirect bằng JavaScript
-                                    if (url?.contains("vnpay_return") == true) {
-                                        if (url.contains("vnp_ResponseCode=00")) {
-                                            viewModel.vnpayUrl = null
-                                            onOrderSuccess(0)
-                                        }
-                                    }
-                                }
-                            }
-                            loadUrl(url)
-                            requestFocus()
-                        }
-                    },
-                    modifier = Modifier.fillMaxSize()
-                )
-                // Nút đóng WebView thủ công
-                Surface(
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .size(40.dp)
-                        .align(Alignment.TopEnd),
-                    shape = RoundedCornerShape(20.dp),
-                    color = Color.Black.copy(alpha = 0.5f),
-                    onClick = { viewModel.vnpayUrl = null }
-                ) {
-                    Icon(
-                        Icons.Default.Close, 
-                        contentDescription = "Đóng", 
-                        tint = Color.White,
-                        modifier = Modifier.padding(8.dp)
-                    )
                 }
             }
         }
