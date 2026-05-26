@@ -11,6 +11,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -114,6 +115,12 @@ fun AdminRevenueScreen(viewModel: AdminViewModel) {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
+                if (selectedMonth == null) {
+                    revenueData?.let { data ->
+                        RevenueBarChart(data.monthlyStats)
+                    }
+                }
+
                 // Chi tiết đơn hàng trong tháng
                 Text(
                     text = if (selectedMonth == null) "Chọn một tháng để xem chi tiết" else "Đơn hàng trong tháng $selectedMonth",
@@ -206,6 +213,87 @@ fun OrderRevenueItem(order: com.example.perfumeshop.model.Order) {
             
             order.items?.forEach { item ->
                 Text("• ${item.name} x${item.quantity}", fontSize = 12.sp)
+            }
+        }
+    }
+}
+
+@Composable
+fun RevenueBarChart(stats: List<com.example.perfumeshop.model.MonthlyRevenue>) {
+    if (stats.isEmpty()) return
+
+    // Lấy tối đa 12 tháng gần nhất và sắp xếp theo thời gian tăng dần
+    val displayStats = stats.sortedBy { it.month }.takeLast(12)
+    val maxRevenue = displayStats.maxOf { it.monthlyRevenue }.coerceAtLeast(1.0)
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(260.dp)
+            .padding(vertical = 8.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                "Biểu đồ doanh thu (12 tháng gần nhất)",
+                fontWeight = FontWeight.Bold,
+                fontSize = 14.sp,
+                color = Color.DarkGray
+            )
+            
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            Row(
+                modifier = Modifier.fillMaxSize(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.Bottom
+            ) {
+                displayStats.forEach { stat ->
+                    val barHeightFraction = (stat.monthlyRevenue / maxRevenue).toFloat().coerceIn(0.05f, 1f)
+                    
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        // Hiển thị giá trị trên đầu cột
+                        Text(
+                            text = String.format(Locale.US, "%.0f", stat.monthlyRevenue),
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF2C3E50)
+                        )
+                        
+                        Spacer(modifier = Modifier.height(4.dp))
+                        
+                        // Cột biểu đồ
+                        Box(
+                            modifier = Modifier
+                                .fillMaxHeight(0.8f * barHeightFraction) // Nhân với 0.8 để chừa khoảng trống cho text
+                                .width(16.dp)
+                                .background(
+                                    brush = Brush.verticalGradient(
+                                        colors = listOf(
+                                            Color(0xFF1A237E), // Xanh đậm phía trên
+                                            Color(0xFF9FA8DA)  // Xanh nhạt phía dưới
+                                        )
+                                    ),
+                                    shape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp)
+                                )
+                        )
+                        
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        // Hiển thị tháng dưới chân cột (ví dụ từ "2023-10" lấy "10")
+                        Text(
+                            text = stat.month.split("-").lastOrNull() ?: "",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Color.Gray
+                        )
+                    }
+                }
             }
         }
     }

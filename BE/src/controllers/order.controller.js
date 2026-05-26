@@ -18,8 +18,8 @@ exports.checkout = async (req, res) => {
     await connection.beginTransaction();
 
     try {
-        // Xác định trạng thái ban đầu: COD thì hoàn thành ngay, VNPay thì chờ (pending)
-        const initialStatus = (payment_method === 'Thanh toán khi nhận hàng (COD)') ? 'completed' : 'pending';
+        // Xác định trạng thái ban đầu: Mặc định là 'pending' cho cả COD và các phương thức khác
+        const initialStatus = 'pending';
 
         // 1. Tạo Đơn hàng
         const [orderResult] = await connection.query(
